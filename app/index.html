@@ -9,23 +9,18 @@
     <meta name="theme-color" content="#030308">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
-
     <title>CyberRPG Life Tracker</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Share Tech Mono', 'Courier New', monospace;
-            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
         :root {
             --neon-color: #00f0ff;
             --neon-glow: 0 0 15px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.3);
@@ -34,35 +29,24 @@
             --bg: #030308;
             --panel: rgba(7, 7, 15, 0.92);
         }
-
         body {
             background-color: var(--bg);
             color: #e2e2ec;
             height: 100vh;
-            overflow: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             background-image: 
                 radial-gradient(circle at 50% 0%, #0a0a1a 0%, #030308 80%),
                 linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px),
                 linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
             padding: 8px;
-            touch-action: manipulation;
         }
-
-        /* Скролл для iOS */
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #05050a; }
         ::-webkit-scrollbar-thumb { background: var(--neon-color); box-shadow: var(--neon-glow); border-radius: 2px; }
-
-        /* Кибер-рамки */
-        .neon-border {
-            border: 1px solid var(--neon-color);
-            box-shadow: var(--neon-glow);
-        }
-        .neon-text {
-            color: var(--neon-color);
-            text-shadow: var(--neon-glow);
-        }
+        .neon-border { border: 1px solid var(--neon-color); box-shadow: var(--neon-glow); }
+        .neon-text { color: var(--neon-color); text-shadow: var(--neon-glow); }
         .cyber-clip {
             clip-path: polygon(0px 0px, calc(100% - 10px) 0px, 100% 10px, 100% 100%, 10px 100%, 0px calc(100% - 10px));
         }
@@ -70,8 +54,6 @@
             clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
         }
         .bar-inner { transition: width 0.4s cubic-bezier(0.2, 0.9, 0.3, 1); }
-
-        /* Кнопки настроения */
         .mood-btn {
             transition: all 0.2s;
             border: 2px solid transparent;
@@ -85,19 +67,31 @@
             box-shadow: var(--neon-glow);
             background: rgba(0, 240, 255, 0.15);
         }
-
-        /* Умное скрытие полей */
         .hidden-field { display: none !important; }
-
-        /* Адаптив для больших экранов */
         @media (min-width: 768px) {
             body { padding: 16px; }
             .mood-btn { font-size: 13px; padding: 14px 0; }
         }
-
-        /* Анимация всплывашки */
         #alert-box {
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        /* Исправление: контейнеры с прокруткой */
+        .tab-content {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 16px;
+        }
+        .tab-content > * {
+            flex-shrink: 0;
+        }
+        .tab-content .flex-1 {
+            flex: 1;
+            min-height: 200px;
+        }
+        #habits-list, #todo-list, #sport-list, #diary-list,
+        #cash-history, #shop-list, #purchase-history, #gold-history {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -185,7 +179,7 @@
         <!-- КВЕСТЫ -->
         <section id="tab-quests" class="tab-content absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
             <!-- Привычки -->
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
                 <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
                     <i class="material-icons text-base">sync</i> ПРИВЫЧКИ
                 </h2>
@@ -213,7 +207,7 @@
             </div>
 
             <!-- Миссии -->
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
                 <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
                     <i class="material-icons text-base">track_changes</i> МИССИИ
                 </h2>
@@ -231,7 +225,7 @@
 
         <!-- СПОРТ -->
         <section id="tab-sport" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
                 <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
                     <i class="material-icons text-base">directions_run</i> ТРЕНИРОВКИ
                 </h2>
@@ -296,7 +290,7 @@
 
         <!-- ДНЕВНИК -->
         <section id="tab-diary" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
                 <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
                     <i class="material-icons text-base">sentiment_satisfied</i> ДНЕВНИК
                 </h2>
@@ -321,7 +315,7 @@
 
         <!-- НАСТРОЙКИ -->
         <section id="tab-settings" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
                 <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
                     <i class="material-icons text-base">palette</i> НАСТРОЙКИ
                 </h2>
