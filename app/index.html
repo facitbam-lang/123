@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CyberRPG">
+    <meta name="theme-color" content="#030308">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <title>CyberRPG Life Tracker</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --neon-color: #00f0ff;
+            --neon-glow: 0 0 15px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.3);
+            --cyber-pink: #ff0055;
+            --cyber-green: #00ffaa;
+            --bg: #030308;
+            --panel: rgba(7, 7, 15, 0.92);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #e2e2ec;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, #0a0a1a 0%, #030308 80%),
+                linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px),
+                linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            padding: 8px;
+            touch-action: manipulation;
+        }
+
+        /* Скролл для iOS */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: #05050a; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-color); box-shadow: var(--neon-glow); border-radius: 2px; }
+
+        /* Кибер-рамки */
+        .neon-border {
+            border: 1px solid var(--neon-color);
+            box-shadow: var(--neon-glow);
+        }
+        .neon-text {
+            color: var(--neon-color);
+            text-shadow: var(--neon-glow);
+        }
+        .cyber-clip {
+            clip-path: polygon(0px 0px, calc(100% - 10px) 0px, 100% 10px, 100% 100%, 10px 100%, 0px calc(100% - 10px));
+        }
+        .cyber-btn-clip {
+            clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+        }
+        .bar-inner { transition: width 0.4s cubic-bezier(0.2, 0.9, 0.3, 1); }
+
+        /* Кнопки настроения */
+        .mood-btn {
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .mood-btn.active-mood {
+            border-color: var(--neon-color);
+            box-shadow: var(--neon-glow);
+            background: rgba(0, 240, 255, 0.15);
+        }
+
+        /* Умное скрытие полей */
+        .hidden-field { display: none !important; }
+
+        /* Адаптив для больших экранов */
+        @media (min-width: 768px) {
+            body { padding: 16px; }
+            .mood-btn { font-size: 13px; padding: 14px 0; }
+        }
+
+        /* Анимация всплывашки */
+        #alert-box {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="flex flex-col h-full max-w-4xl mx-auto">
+
+    <!-- ====== ВЕРХНЯЯ ПАНЕЛЬ ====== -->
+    <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex flex-wrap items-center justify-between gap-2 backdrop-blur-md mb-3">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 border-2 border-dashed border-[var(--neon-color)] rounded-full flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,240,255,0.1)]">
+                <i class="material-icons text-3xl neon-text">psychology</i>
+            </div>
+            <div>
+                <div class="neon-text text-lg font-bold tracking-widest">CYBER_RPG</div>
+                <div class="text-[10px] text-gray-400">v4.0 · iOS</div>
+            </div>
+        </div>
+        <div class="flex gap-3 text-xs">
+            <div class="bg-white/5 px-3 py-1 rounded border border-white/10 text-center">
+                <span class="text-gray-500 block text-[9px]">LVL</span>
+                <strong id="char-lvl" class="text-white text-lg">1</strong>
+            </div>
+            <div class="bg-white/5 px-3 py-1 rounded border border-white/10 text-center">
+                <span class="text-gray-500 block text-[9px]">GOLD</span>
+                <strong id="char-gold" class="text-yellow-400 text-lg">0</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== СТАТЫ ====== -->
+    <div class="grid grid-cols-4 gap-2 mb-3">
+        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
+            <span class="text-[9px] text-gray-500">INT</span>
+            <div id="stat-int" class="text-sm font-bold text-white">10</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
+            <span class="text-[9px] text-gray-500">STR</span>
+            <div id="stat-str" class="text-sm font-bold text-white">10</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
+            <span class="text-[9px] text-gray-500">XP</span>
+            <div id="xp-text" class="text-[10px] neon-text">0/100</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
+            <span class="text-[9px] text-gray-500">HP</span>
+            <div id="hp-text" class="text-[10px] text-[var(--cyber-pink)]">100</div>
+        </div>
+    </div>
+
+    <!-- ====== ПРОГРЕСС-БАРЫ ====== -->
+    <div class="flex flex-col gap-2 mb-3">
+        <div>
+            <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/10">
+                <div id="xp-bar" class="bar-inner h-full bg-[var(--neon-color)] shadow-[var(--neon-glow)]" style="width:0%"></div>
+            </div>
+        </div>
+        <div>
+            <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/10">
+                <div id="hp-bar" class="bar-inner h-full bg-[var(--cyber-pink)] shadow-[0_0_10px_#ff0055]" style="width:100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== СВОДКА ДНЯ ====== -->
+    <div class="bg-white/5 border border-white/10 p-2 rounded mb-3">
+        <div class="text-[9px] text-gray-400 font-bold uppercase flex items-center gap-1">
+            <i class="material-icons text-sm">today</i> СВОДКА ДНЯ
+        </div>
+        <div id="daily-summary" class="text-[10px] text-gray-300 mt-1 max-h-[40px] overflow-y-auto"></div>
+    </div>
+
+    <!-- ====== НАВИГАЦИЯ (ВКЛАДКИ) ====== -->
+    <div class="flex gap-1 mb-3 overflow-x-auto pb-1">
+        <button class="nav-button active flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('quests', this)">КВЕСТЫ</button>
+        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('sport', this)">СПОРТ</button>
+        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('finance', this)">ФИНАНСЫ</button>
+        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('diary', this)">ДНЕВНИК</button>
+        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('settings', this)">НАСТР</button>
+    </div>
+
+    <!-- ====== КОНТЕНТ ВКЛАДОК ====== -->
+    <div class="flex-1 overflow-hidden relative">
+
+        <!-- КВЕСТЫ -->
+        <section id="tab-quests" class="tab-content absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
+            <!-- Привычки -->
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">sync</i> ПРИВЫЧКИ
+                </h2>
+                <div class="space-y-2 mb-3">
+                    <input type="text" id="habit-name" placeholder="Описание..." class="w-full bg-[#090912] border border-white/10 text-white p-3 text-sm rounded focus:outline-none focus:border-[var(--neon-color)]">
+                    <div class="flex gap-2 flex-wrap">
+                        <select id="habit-stat" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded focus:outline-none">
+                            <option value="INT">INT</option><option value="STR">STR</option>
+                        </select>
+                        <select id="habit-reward-type" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded focus:outline-none" onchange="toggleHabitRewardFields()">
+                            <option value="per_step">За шаг</option><option value="per_target">Бонус за цель</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <label class="flex items-center gap-1 text-xs text-gray-400 bg-[#090912] p-2 rounded border border-white/10">
+                            <input type="checkbox" id="habit-has-scale" onchange="toggleHabitScaleField()" class="accent-[var(--neon-color)]"> ШКАЛА
+                        </label>
+                        <input type="number" id="habit-scale-target" placeholder="Цель" value="10" class="hidden w-16 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                        <input type="number" id="habit-gold-per-step" placeholder="Золота за шаг" value="1" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                        <input type="number" id="habit-gold-bonus" placeholder="Бонус за цель" value="5" class="hidden-field flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                    </div>
+                    <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip hover:opacity-90" onclick="addHabit()">+ ДОБАВИТЬ</button>
+                </div>
+                <ul id="habits-list" class="space-y-2 max-h-[200px] overflow-y-auto"></ul>
+            </div>
+
+            <!-- Миссии -->
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">track_changes</i> МИССИИ
+                </h2>
+                <div class="flex gap-2 mb-3 flex-wrap">
+                    <input type="text" id="todo-name" placeholder="Название..." class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded focus:outline-none">
+                    <select id="todo-stat" class="bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                        <option value="INT">INT</option><option value="STR">STR</option>
+                    </select>
+                    <input type="number" id="todo-gold" placeholder="Золото" value="25" class="w-20 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                </div>
+                <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip mb-3" onclick="addTodo()">+ ЗАГРУЗИТЬ</button>
+                <ul id="todo-list" class="space-y-2 max-h-[150px] overflow-y-auto"></ul>
+            </div>
+        </section>
+
+        <!-- СПОРТ -->
+        <section id="tab-sport" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">directions_run</i> ТРЕНИРОВКИ
+                </h2>
+                <div class="space-y-2 mb-3">
+                    <input type="text" id="sport-name" placeholder="Название..." class="w-full bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
+                    <div class="flex gap-2 flex-wrap">
+                        <input type="number" id="sport-target" placeholder="Цель" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                        <input type="text" id="sport-unit" placeholder="Ед." class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <select id="sport-reward-type" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded" onchange="toggleSportRewardFields()">
+                            <option value="per_step">За шаг</option><option value="per_target">Бонус за цель</option>
+                        </select>
+                        <input type="number" id="sport-gold-per-step" placeholder="Золота за шаг" value="2" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                        <input type="number" id="sport-gold-bonus" placeholder="Бонус" value="10" class="hidden-field flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
+                    </div>
+                    <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addSportMission()">+ ДОБАВИТЬ</button>
+                </div>
+                <ul id="sport-list" class="space-y-2 max-h-[300px] overflow-y-auto"></ul>
+            </div>
+        </section>
+
+        <!-- ФИНАНСЫ -->
+        <section id="tab-finance" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">attach_money</i> ФИНАНСЫ
+                </h2>
+                <div class="text-2xl font-bold mb-3 neon-text text-center">
+                    БАЛАНС: <span id="fin-balance" class="text-[var(--cyber-green)]">0 ₽</span>
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <input type="number" id="cash-amount" placeholder="Сумма ₽" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
+                    <input type="text" id="cash-desc" placeholder="Описание" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
+                </div>
+                <div class="flex gap-2 mb-3">
+                    <button class="flex-1 bg-[var(--cyber-green)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addTransaction('income')">+ ДОХОД</button>
+                    <button class="flex-1 bg-[var(--cyber-pink)] text-white p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addTransaction('expense')">- РАСХОД</button>
+                </div>
+                <div id="cash-history" class="max-h-[120px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5"></div>
+
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mt-4 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">shopping_cart</i> МАГАЗИН
+                </h2>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="shop-item-name" placeholder="Товар" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
+                    <input type="number" id="shop-item-price" placeholder="Цена" value="50" class="w-20 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
+                </div>
+                <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip mb-3" onclick="addShopItem()">+ В МАГАЗИН</button>
+                <div id="shop-list" class="max-h-[150px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5"></div>
+
+                <div class="mt-3">
+                    <h3 class="text-[10px] text-gray-400 font-bold uppercase">// ИСТОРИЯ ПОКУПОК</h3>
+                    <div id="purchase-history" class="max-h-[80px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5 mt-1"></div>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-[10px] text-gray-400 font-bold uppercase">// ИСТОРИЯ ЗОЛОТА</h3>
+                    <div id="gold-history" class="max-h-[100px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5 mt-1"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ДНЕВНИК -->
+        <section id="tab-diary" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">sentiment_satisfied</i> ДНЕВНИК
+                </h2>
+                <div class="grid grid-cols-5 gap-2 mb-3">
+                    <button class="mood-btn" style="background:#00c853;" onclick="selectMood('Отличное', this)">ОТЛ</button>
+                    <button class="mood-btn" style="background:#ffd600;color:#000;" onclick="selectMood('Стабильное', this)">СТАБ</button>
+                    <button class="mood-btn" style="background:#2979ff;" onclick="selectMood('Спокойное', this)">СПОК</button>
+                    <button class="mood-btn" style="background:#ff6d00;" onclick="selectMood('Усталость', this)">УСТ</button>
+                    <button class="mood-btn" style="background:#d50000;" onclick="selectMood('Выгорание', this)">ВЫГ</button>
+                </div>
+                <div class="flex flex-col gap-2 mb-3">
+                    <span id="diary-mode-indicator" class="edit-mode-indicator hidden text-yellow-400 text-[10px]">// РЕДАКТИРОВАНИЕ</span>
+                    <textarea id="diary-entry-text" rows="3" placeholder="Твои мысли..." class="bg-[#090912] border border-white/10 text-white p-3 text-sm rounded resize-none"></textarea>
+                    <div class="flex gap-2">
+                        <button id="diary-save-btn" class="flex-1 bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="saveDiaryEntry()">СОХРАНИТЬ</button>
+                        <button id="diary-cancel-btn" class="hidden bg-white/10 text-white px-4 text-xs font-bold uppercase rounded" onclick="cancelDiaryEdit()">ОТМЕНА</button>
+                    </div>
+                </div>
+                <div id="diary-list" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+            </div>
+        </section>
+
+        <!-- НАСТРОЙКИ -->
+        <section id="tab-settings" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
+            <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex-1">
+                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
+                    <i class="material-icons text-base">palette</i> НАСТРОЙКИ
+                </h2>
+                <div class="mb-4">
+                    <p class="text-xs text-gray-400 mb-2">НЕОНОВЫЙ ЦВЕТ:</p>
+                    <div class="flex gap-2">
+                        <button class="w-10 h-10 rounded-full border border-black" style="background:#00f0ff;" onclick="changeTheme('#00f0ff')"></button>
+                        <button class="w-10 h-10 rounded-full border border-black" style="background:#ff0055;" onclick="changeTheme('#ff0055')"></button>
+                        <button class="w-10 h-10 rounded-full border border-black" style="background:#39ff14;" onclick="changeTheme('#39ff14')"></button>
+                        <button class="w-10 h-10 rounded-full border border-black" style="background:#ffaa00;" onclick="changeTheme('#ffaa00')"></button>
+                        <button class="w-10 h-10 rounded-full border border-black" style="background:#a020f0;" onclick="changeTheme('#a020f0')"></button>
+                    </div>
+                </div>
+                <div class="border-t border-white/5 pt-4">
+                    <h3 class="text-xs text-[var(--cyber-pink)] font-bold mb-2 uppercase">DANGER ZONE</h3>
+                    <button class="w-full bg-[var(--cyber-pink)] text-white p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="resetSystem()">ПОЛНЫЙ СБРОС</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- ====== СИСТЕМНЫЙ АЛЕРТ ====== -->
+<div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#070710] border border-[var(--neon-color)] shadow-[var(--neon-glow)] p-3 rounded text-xs font-bold transition-transform duration-300 translate-y-[200%] z-50 text-center max-w-xs">
+    // SYSTEM: ONLINE
+</div>
+
+<script>
+// ====== ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ======
+let defaultState = {
+    lvl: 1, xp: 0, hp: 100, gold: 0, int: 10, str: 10, balance: 0,
+    activeTheme: '#00f0ff',
+    selectedMood: '',
+    habits: [
+        { id: 1, name: "Утренняя зарядка", stat: "STR", hasScale: true, scaleCurrent: 0, scaleTarget: 10, rewardType: "per_target", goldPerStep: 1, goldBonus: 5, streak: 0, lastDate: null },
+        { id: 2, name: "Чтение 30 мин", stat: "INT", hasScale: false, rewardType: "per_step", goldPerStep: 2, goldBonus: 0, streak: 0, lastDate: null }
+    ],
+    todos: [
+        { id: 1, name: "Настроить трекер", stat: "INT", gold: 25 }
+    ],
+    sportMissions: [
+        { id: 1, name: "Отжимания", target: 40, current: 0, unit: "раз", rewardType: "per_step", goldPerStep: 2, goldBonus: 10 },
+        { id: 2, name: "Растяжка", target: 5, current: 0, unit: "мин", rewardType: "per_target", goldPerStep: 1, goldBonus: 5 }
+    ],
+    shopItems: [
+        { id: 1, name: "🎮 Час на игру", price: 50 },
+        { id: 2, name: "🍕 Читмил", price: 100 }
+    ],
+    purchaseHistory: [],
+    transactions: [],
+    goldTransactions: [],
+    diaryEntries: [],
+    dailyLog: []
+};
+
+let state = JSON.parse(localStorage.getItem('cyberRPG_ios')) || defaultState;
+if (!state.shopItems) state.shopItems = [];
+if (!state.purchaseHistory) state.purchaseHistory = [];
+if (!state.sportMissions) state.sportMissions = [];
+if (!state.goldTransactions) state.goldTransactions = [];
+if (!state.transactions) state.transactions = [];
+if (!state.diaryEntries) state.diaryEntries = [];
+if (!state.dailyLog) state.dailyLog = [];
+if (state.balance === undefined) state.balance = 0;
+if (state.gold === undefined) state.gold = 0;
+
+let editingDiaryId = null;
+
+function triggerAlert(msg) {
+    const box = document.getElementById('alert-box');
+    box.innerText = `// ${msg}`;
+    box.classList.remove('translate-y-[200%]');
+    setTimeout(() => box.classList.add('translate-y-[200%]'), 2500);
+}
+
+function saveState() {
+    localStorage.setItem('cyberRPG_ios', JSON.stringify(state));
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden'); });
+    document.querySelectorAll('.nav-button').forEach(el => { el.classList.remove('active'); el.style.borderColor = 'rgba(255,255,255,0.05)'; el.style.color = '#888'; });
+    document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+    btn.classList.add('active');
+    btn.style.borderColor = state.activeTheme;
+    btn.style.color = state.activeTheme;
+}
+
+function changeTheme(color) {
+    state.activeTheme = color;
+    document.documentElement.style.setProperty('--neon-color', color);
+    document.documentElement.style.setProperty('--neon-glow', `0 0 15px ${color}, 0 0 30px ${color}4d`);
+    document.querySelector('.nav-button.active')?.style.setProperty('border-color', color);
+    document.querySelector('.nav-button.active')?.style.setProperty('color', color);
+    saveState();
+}
+
+// ====== ОТРИСОВКА СТАТОВ ======
+function renderStats() {
+    document.getElementById('char-lvl').innerText = state.lvl;
+    document.getElementById('char-gold').innerText = state.gold;
+    document.getElementById('stat-int').innerText = state.int;
+    document.getElementById('stat-str').innerText = state.str;
+    document.getElementById('fin-balance').innerText = `${state.balance.toLocaleString()} ₽`;
+    document.getElementById('xp-text').innerHTML = `${state.xp}/100`;
+    document.getElementById('xp-bar').style.width = `${Math.min(100, state.xp)}%`;
+    document.getElementById('hp-text').innerHTML = state.hp;
+    document.getElementById('hp-bar').style.width = `${state.hp}%`;
+}
+
+function addXP(amount) {
+    state.xp += amount;
+    while (state.xp >= 100) {
+        state.lvl += 1;
+        state.xp -= 100;
+        state.gold += 50;
+        logGoldTransaction(`Повышение уровня до LVL ${state.lvl}`, 50, 'gain');
+        triggerAlert(`LEVEL ${state.lvl} REACHED`);
+    }
+    saveState();
+    renderStats();
+}
+
+// ====== СВОДКА ДНЯ ======
+function updateDailySummary() {
+    const summary = document.getElementById('daily-summary');
+    const today = new Date().toDateString();
+    const todayLogs = state.dailyLog.filter(log => log.date === today);
+    if (todayLogs.length === 0) {
+        summary.innerHTML = '<span class="text-gray-500">Нет активности</span>';
+        return;
+    }
+    summary.innerHTML = todayLogs.slice(0, 5).map(log => 
+        `<div class="text-[10px] text-gray-300 border-b border-white/5 py-0.5">${log.icon} ${log.text}</div>`
+    ).join('');
+}
+
+function addDailyLog(icon, text) {
+    const today = new Date().toDateString();
+    state.dailyLog.unshift({ date: today, icon, text, time: new Date().toLocaleTimeString() });
+    if (state.dailyLog.length > 50) state.dailyLog = state.dailyLog.slice(0, 50);
+    saveState();
+    updateDailySummary();
+}
+
+// ====== ПРИВЫЧКИ ======
+function toggleHabitScaleField() {
+    const checked = document.getElementById('habit-has-scale').checked;
+    document.getElementById('habit-scale-target').classList.toggle('hidden', !checked);
+}
+function toggleHabitRewardFields() {
+    const type = document.getElementById('habit-reward-type').value;
+    document.getElementById('habit-gold-per-step').classList.toggle('hidden-field', type === 'per_target');
+    document.getElementById('habit-gold-bonus').classList.toggle('hidden-field', type === 'per_step');
+}
+
+function renderHabits() {
+    const list = document.getElementById('habits-list');
+    list.innerHTML = '';
+    state.habits.forEach(h => {
+        const li = document.createElement('li');
+        li.className = 'bg-white/5 border border-white/10 p-3 rounded flex flex-wrap justify-between items-center gap-2';
+        let scaleHTML = '';
+        if (h.hasScale) {
+            const pct = Math.min(100, Math.floor((h.scaleCurrent / h.scaleTarget) * 100));
+            scaleHTML = `
+                <div class="w-full mt-1">
+                    <div class="flex justify-between text-[10px] text-gray-400">
+                        <span>${h.scaleCurrent}/${h.scaleTarget}</span>
+                        <span>${pct}%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-black/60 rounded overflow-hidden border border-white/5">
+                        <div class="bg-[var(--neon-color)] h-full bar-inner" style="width:${pct}%;"></div>
+                    </div>
+                </div>
+            `;
+        }
+        const rewardText = h.rewardType === 'per_step' ? `+${h.goldPerStep} за шаг` : `+${h.goldBonus} за цель`;
+        const streakText = h.streak > 0 ? `<span class="bg-orange-500 text-black px-1.5 py-0.5 rounded text-[9px] font-bold">🔥${h.streak}</span>` : '';
+        li.innerHTML = `
+            <div class="flex-1 min-w-[120px]">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-sm text-white">${h.name}</span> ${streakText}
+                </div>
+                <div class="text-[10px] text-gray-400">${rewardText} +10 XP +1 ${h.stat}</div>
+                ${scaleHTML}
+            </div>
+            <div class="flex gap-1 flex-wrap">
+                ${h.hasScale ? `
+                    <button class="bg-white/10 text-white px-2 py-1 text-xs rounded" onclick="adjustHabitScale(${h.id}, 1)">+1</button>
+                    <button class="bg-white/10 text-white px-2 py-1 text-xs rounded" onclick="adjustHabitScale(${h.id}, -1)">-1</button>
+                ` : `
+                    <button class="bg-[var(--neon-color)] text-black px-3 py-1 text-xs uppercase rounded" onclick="completeHabit(${h.id})">Вып</button>
+                `}
+                <button class="bg-[var(--cyber-pink)] text-white px-2 py-1 text-xs rounded" onclick="failHabit()">Урон</button>
+                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editHabit(${h.id})"><i class="material-icons text-sm">edit</i></button>
+                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('habits', ${h.id})"><i class="material-icons text-sm">delete</i></button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function addHabit() {
+    const name = document.getElementById('habit-name').value.trim();
+    if (!name) return;
+    const stat = document.getElementById('habit-stat').value;
+    const hasScale = document.getElementById('habit-has-scale').checked;
+    const target = parseInt(document.getElementById('habit-scale-target').value) || 10;
+    const rewardType = document.getElementById('habit-reward-type').value;
+    const goldPerStep = parseInt(document.getElementById('habit-gold-per-step').value) || 1;
+    const goldBonus = parseInt(document.getElementById('habit-gold-bonus').value) || 5;
+    state.habits.push({ id: Date.now(), name, stat, hasScale, scaleCurrent: 0, scaleTarget: hasScale ? target : 0, rewardType, goldPerStep, goldBonus, streak: 0, lastDate: null });
+    document.getElementById('habit-name').value = '';
+    document.getElementById('habit-has-scale').checked = false;
+    document.getElementById('habit-scale-target').classList.add('hidden');
+    document.getElementById('habit-gold-per-step').classList.remove('hidden-field');
+    document.getElementById('habit-gold-bonus').classList.add('hidden-field');
+    saveState();
+    renderHabits();
+    triggerAlert("Привычка добавлена");
+}
+
+function editHabit(id) {
+    const h = state.habits.find(x => x.id === id);
+    if (!h) return;
+    const newName = prompt("Новое название:", h.name);
+    if (newName !== null && newName.trim()) { h.name = newName.trim(); saveState(); renderHabits(); triggerAlert("Обновлено"); }
+}
+
+function updateStreak(habit) {
+    const today = new Date().toDateString();
+    if (habit.lastDate === today) return;
+    if (habit.lastDate === null) habit.streak = 1;
+    else {
+        const last = new Date(habit.lastDate);
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (last.toDateString() === yesterday.toDateString()) habit.streak += 1;
+        else if (last.toDateString() !== today) habit.streak = 0;
+    }
+    habit.lastDate = today;
+}
+
+function adjustHabitScale(id, amount) {
+    const h = state.habits.find(x => x.id === id);
+    if (!h) return;
+    h.scaleCurrent = Math.max(0, h.scaleCurrent + amount);
+    if (h.rewardType === 'per_step' && amount > 0) {
+        const reward = h.goldPerStep * amount;
+        state.gold += reward;
+        logGoldTransaction(`Привычка "${h.name}" (шаг)`, reward, 'gain');
+        addDailyLog('✅', `Привычка "${h.name}" +${reward} золота`);
+        updateStreak(h);
+        triggerAlert(`+${reward} GOLD`);
+    }
+    if (h.scaleCurrent >= h.scaleTarget) {
+        h.scaleCurrent = 0;
+        if (h.rewardType === 'per_target') {
+            state.gold += h.goldBonus;
+            logGoldTransaction(`Бонус за привычку "${h.name}"`, h.goldBonus, 'gain');
+            addDailyLog('🎯', `Цель "${h.name}" достигнута! +${h.goldBonus} золота`);
+            triggerAlert(`+${h.goldBonus} GOLD БОНУС`);
+        }
+        completeHabitAwards(h.stat, h.name);
+        updateStreak(h);
+    }
+    saveState();
+    renderStats();
+    renderHabits();
+}
+
+function completeHabit(id) {
+    const h = state.habits.find(x => x.id === id);
+    if (!h) return;
+    if (h.rewardType === 'per_step' && !h.hasScale) {
+        state.gold += h.goldPerStep;
+        logGoldTransaction(`Привычка "${h.name}"`, h.goldPerStep, 'gain');
+        addDailyLog('✅', `Привычка "${h.name}" +${h.goldPerStep} золота`);
+    }
+    completeHabitAwards(h.stat, h.name);
+    updateStreak(h);
+    saveState();
+    renderStats();
+    renderHabits();
+}
+
+function completeHabitAwards(stat, name) {
+    if (stat === 'INT') state.int += 1;
+    if (stat === 'STR') state.str += 1;
+    addXP(10);
+    addDailyLog('⭐', `Привычка "${name}" выполнена! +10 XP`);
+    triggerAlert("+10 XP");
+}
+
+function failHabit() {
+    state.hp = Math.max(0, state.hp - 10);
+    if (state.hp === 0) { state.hp = 30; triggerAlert("HP восстановлен до 30"); }
+    addDailyLog('💔', 'Пропущена привычка -10 HP');
+    saveState();
+    renderStats();
+    triggerAlert("-10 HP");
+}
+
+// ====== МИССИИ ======
+function renderTodos() {
+    const list = document.getElementById('todo-list');
+    list.innerHTML = '';
+    state.todos.forEach(t => {
+        const li = document.createElement('li');
+        li.className = 'bg-white/5 border border-white/10 p-2 rounded flex justify-between items-center';
+        li.innerHTML = `
+            <div>
+                <span class="text-sm text-white">${t.name}</span>
+                <div class="text-[10px] text-gray-400">+30 XP +${t.gold} GOLD +2 ${t.stat}</div>
+            </div>
+            <div class="flex gap-1">
+                <button class="bg-[var(--neon-color)] text-black px-2 py-1 text-xs uppercase rounded" onclick="completeTodo(${t.id})">Вып</button>
+                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editTodo(${t.id})"><i class="material-icons text-sm">edit</i></button>
+                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('todos', ${t.id})"><i class="material-icons text-sm">delete</i></button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function addTodo() {
+    const name = document.getElementById('todo-name').value.trim();
+    if (!name) return;
+    const stat = document.getElementById('todo-stat').value;
+    const gold = parseInt(document.getElementById('todo-gold').value) || 25;
+    state.todos.push({ id: Date.now(), name, stat, gold });
+    document.getElementById('todo-name').value = '';
+    saveState();
+    renderTodos();
+    triggerAlert("Миссия добавлена");
+}
+
+function editTodo(id) {
+    const t = state.todos.find(x => x.id === id);
+    if (!t) return;
+    const newName = prompt("Новое название:", t.name);
+    if (newName !== null && newName.trim()) { t.name = newName.trim(); }
+    const newGold = prompt("Золото:", t.gold);
+    if (newGold !== null && !isNaN(parseInt(newGold))) t.gold = parseInt(newGold);
+    saveState();
+    renderTodos();
+    triggerAlert("Обновлено");
+}
+
+function completeTodo(id) {
+    const idx = state.todos.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const t = state.todos[idx];
+    if (t.stat === 'INT') state.int += 2;
+    if (t.stat === 'STR') state.str += 2;
+    state.gold += t.gold;
+    logGoldTransaction(`Миссия: "${t.name}"`, t.gold, 'gain');
+    addDailyLog('🏆', `Миссия "${t.name}" выполнена! +${t.gold} золота`);
+    state.todos.splice(idx, 1);
+    addXP(30);
+    saveState();
+    renderStats();
+    renderTodos();
+    triggerAlert("Миссия выполнена!");
+}
+
+// ====== СПОРТ ======
+function toggleSportRewardFields() {
+    const type = document.getElementById('sport-reward-type').value;
+    document.getElementById('sport-gold-per-step').classList.toggle('hidden-field', type === 'per_target');
+    document.getElementById('sport-gold-bonus').classList.toggle('hidden-field', type === 'per_step');
+}
+
+function renderSportMissions() {
+    const list = document.getElementById('sport-list');
+    list.innerHTML = '';
+    if (!state.sportMissions.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-4">Нет тренировок</div>'; return; }
+    state.sportMissions.forEach(m => {
+        const pct = Math.min(100, Math.floor((m.current / m.target) * 100));
+        const rewardText = m.rewardType === 'per_step' ? `+${m.goldPerStep} за шаг` : `+${m.goldBonus} за цель`;
+        const li = document.createElement('li');
+        li.className = 'bg-white/5 border border-white/10 p-3 rounded flex flex-col gap-2';
+        li.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-sm text-white uppercase">${m.name}</span>
+                    <div class="text-[10px] text-[var(--cyber-green)]">${rewardText} +15 XP</div>
+                </div>
+                <div class="flex gap-1">
+                    <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editSport(${m.id})"><i class="material-icons text-sm">edit</i></button>
+                    <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('sportMissions', ${m.id})"><i class="material-icons text-sm">delete</i></button>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs text-gray-400">
+                    <span>${m.current} / ${m.target} ${m.unit}</span>
+                    <span class="neon-text">${pct}%</span>
+                </div>
+                <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/5">
+                    <div class="bg-[var(--neon-color)] h-full bar-inner" style="width:${pct}%;"></div>
+                </div>
+            </div>
+            <div class="flex gap-1 justify-end">
+                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, -5)">-5</button>
+                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, -1)">-1</button>
+                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, 1)">+1</button>
+                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, 5)">+5</button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function addSportMission() {
+    const name = document.getElementById('sport-name').value.trim();
+    const target = parseInt(document.getElementById('sport-target').value);
+    const unit = document.getElementById('sport-unit').value.trim() || "раз";
+    const rewardType = document.getElementById('sport-reward-type').value;
+    const goldPerStep = parseInt(document.getElementById('sport-gold-per-step').value) || 2;
+    const goldBonus = parseInt(document.getElementById('sport-gold-bonus').value) || 10;
+    if (!name || !target || target <= 0) { triggerAlert("Ошибка"); return; }
+    state.sportMissions.push({ id: Date.now(), name, target, current: 0, unit, rewardType, goldPerStep, goldBonus });
+    document.getElementById('sport-name').value = '';
+    document.getElementById('sport-target').value = '';
+    document.getElementById('sport-unit').value = '';
+    document.getElementById('sport-gold-per-step').classList.remove('hidden-field');
+    document.getElementById('sport-gold-bonus').classList.add('hidden-field');
+    saveState();
+    renderSportMissions();
+    triggerAlert("Тренировка добавлена");
+}
+
+function editSport(id) {
+    const m = state.sportMissions.find(x => x.id === id);
+    if (!m) return;
+    const newName = prompt("Новое название:", m.name);
+    if (newName !== null && newName.trim()) m.name = newName.trim();
+    const newTarget = prompt("Новая цель:", m.target);
+    if (newTarget !== null && !isNaN(parseInt(newTarget)) && parseInt(newTarget) > 0) m.target = parseInt(newTarget);
+    saveState();
+    renderSportMissions();
+    triggerAlert("Обновлено");
+}
+
+function adjustSport(id, amount) {
+    const m = state.sportMissions.find(x => x.id === id);
+    if (!m) return;
+    m.current = Math.max(0, m.current + amount);
+    if (m.rewardType === 'per_step' && amount > 0) {
+        const reward = m.goldPerStep * amount;
+        state.gold += reward;
+        logGoldTransaction(`Спорт "${m.name}" (шаг)`, reward, 'gain');
+        addDailyLog('💪', `Спорт "${m.name}" +${reward} золота`);
+        triggerAlert(`+${reward} GOLD`);
+    }
+    if (m.current >= m.target) {
+        m.current = 0;
+        if (m.rewardType === 'per_target') {
+            state.gold += m.goldBonus;
+            logGoldTransaction(`Бонус за спорт "${m.name}"`, m.goldBonus, 'gain');
+            addDailyLog('🏅', `Тренировка "${m.name}" завершена! +${m.goldBonus} золота`);
+            triggerAlert(`+${m.goldBonus} GOLD БОНУС`);
+        }
+        state.str += 1;
+        addXP(15);
+        triggerAlert("Тренировка завершена!");
+    }
+    saveState();
+    renderStats();
+    renderSportMissions();
+}
+
+// ====== ФИНАНСЫ ======
+function renderTransactions() {
+    const h = document.getElementById('cash-history');
+    h.innerHTML = '';
+    if (!state.transactions.length) { h.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">Нет транзакций</div>'; return; }
+    state.transactions.forEach(tx => {
+        const isInc = tx.type === 'income';
+        const div = document.createElement('div');
+        div.className = 'bg-black/40 border border-white/5 p-1.5 rounded text-xs flex justify-between items-center';
+        div.innerHTML = `
+            <div>
+                <span class="${isInc ? 'text-[var(--cyber-green)]' : 'text-[var(--cyber-pink)]'} font-bold">${isInc ? '+' : '-'}${tx.amount.toLocaleString()} ₽</span>
+                <span class="text-gray-500 text-[9px] ml-1">${tx.date}</span>
+                <div class="text-gray-300">${tx.desc}</div>
+            </div>
+            <button class="text-gray-600 hover:text-red-400" onclick="deleteTransaction(${tx.id})"><i class="material-icons text-sm">delete</i></button>
+        `;
+        h.appendChild(div);
+    });
+}
+
+function addTransaction(type) {
+    const amt = parseFloat(document.getElementById('cash-amount').value);
+    const desc = document.getElementById('cash-desc').value.trim() || "Не указано";
+    if (isNaN(amt) || amt <= 0) { triggerAlert("Неверная сумма"); return; }
+    if (type === 'income') state.balance += amt;
+    else state.balance -= amt;
+    state.transactions.unshift({ id: Date.now(), type, amount: amt, desc, date: new Date().toLocaleDateString() });
+    addDailyLog(type === 'income' ? '💰' : '💸', `${desc}: ${type === 'income' ? '+' : '-'}${amt} ₽`);
+    document.getElementById('cash-amount').value = '';
+    document.getElementById('cash-desc').value = '';
+    saveState();
+    renderStats();
+    renderTransactions();
+    triggerAlert("Обновлено");
+}
+
+function deleteTransaction(id) {
+    const idx = state.transactions.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const tx = state.transactions[idx];
+    if (tx.type === 'income') state.balance -= tx.amount;
+    else state.balance += tx.amount;
+    state.transactions.splice(idx, 1);
+    saveState();
+    renderStats();
+    renderTransactions();
+    triggerAlert("Удалено");
+}
+
+// ====== МАГАЗИН ======
+function renderShopItems() {
+    const list = document.getElementById('shop-list');
+    list.innerHTML = '';
+    if (!state.shopItems.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">Магазин пуст</div>'; return; }
+    state.shopItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'bg-black/40 border border-white/5 p-2 rounded text-xs flex justify-between items-center';
+        div.innerHTML = `
+            <div>
+                <span class="text-white">${item.name}</span>
+                <span class="text-yellow-400 ml-1">${item.price} GOLD</span>
+            </div>
+            <div class="flex gap-1">
+                <button class="bg-[var(--neon-color)] text-black px-2 py-1 text-[10px] uppercase rounded" onclick="buyShopItem(${item.id})">Купить</button>
+                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editShopItem(${item.id})"><i class="material-icons text-sm">edit</i></button>
+                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('shopItems', ${item.id})"><i class="material-icons text-sm">delete</i></button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function addShopItem() {
+    const name = document.getElementById('shop-item-name').value.trim();
+    const price = parseInt(document.getElementById('shop-item-price').value);
+    if (!name || isNaN(price) || price <= 0) { triggerAlert("Ошибка"); return; }
+    state.shopItems.push({ id: Date.now(), name, price });
+    document.getElementById('shop-item-name').value = '';
+    document.getElementById('shop-item-price').value = '50';
+    saveState();
+    renderShopItems();
+    triggerAlert("Товар добавлен");
+}
+
+function editShopItem(id) {
+    const item = state.shopItems.find(x => x.id === id);
+    if (!item) return;
+    const newName = prompt("Новое название:", item.name);
+    if (newName !== null && newName.trim()) item.name = newName.trim();
+    const newPrice = prompt("Новая цена:", item.price);
+    if (newPrice !== null && !isNaN(parseInt(newPrice)) && parseInt(newPrice) > 0) item.price = parseInt(newPrice);
+    saveState();
+    renderShopItems();
+    triggerAlert("Обновлено");
+}
+
+function buyShopItem(id) {
+    const item = state.shopItems.find(x => x.id === id);
+    if (!item) return;
+    if (state.gold < item.price) { triggerAlert("Не хватает золота"); return; }
+    state.gold -= item.price;
+    logGoldTransaction(`Покупка: "${item.name}"`, item.price, 'spend');
+    state.purchaseHistory.unshift({ id: Date.now(), name: item.name, price: item.price, date: new Date().toLocaleString() });
+    addDailyLog('🛒', `Покупка: "${item.name}" за ${item.price} золота`);
+    saveState();
+    renderStats();
+    renderShopItems();
+    renderPurchaseHistory();
+    triggerAlert(`Куплено: ${item.name}`);
+}
+
+function renderPurchaseHistory() {
+    const h = document.getElementById('purchase-history');
+    h.innerHTML = '';
+    if (!state.purchaseHistory.length) { h.innerHTML = '<div class="text-gray-500 text-[10px] text-center py-1">Нет покупок</div>'; return; }
+    state.purchaseHistory.slice(0, 15).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'bg-black/30 border border-white/5 p-1 rounded text-[10px] flex justify-between items-center';
+        div.innerHTML = `<span class="text-gray-300">${p.name}</span><span class="text-yellow-400">-${p.price} GOLD</span>`;
+        h.appendChild(div);
+    });
+}
+
+// ====== ЗОЛОТО ======
+function logGoldTransaction(desc, amount, type) {
+    state.goldTransactions.unshift({ id: Date.now(), desc, amount, type, date: new Date().toLocaleString() });
+    saveState();
+    renderGoldHistory();
+}
+
+function renderGoldHistory() {
+    const h = document.getElementById('gold-history');
+    h.innerHTML = '';
+    if (!state.goldTransactions.length) { h.innerHTML = '<div class="text-gray-500 text-[10px] text-center py-1">Нет записей</div>'; return; }
+    state.goldTransactions.slice(0, 20).forEach(gt => {
+        const isGain = gt.type === 'gain';
+        const div = document.createElement('div');
+        div.className = 'bg-black/30 border border-white/5 p-1 rounded text-[10px] flex justify-between items-center';
+        div.innerHTML = `
+            <span class="${isGain ? 'text-yellow-400' : 'text-gray-400'}">${isGain ? '+' : '-'}${gt.amount} GOLD</span>
+            <span class="text-gray-500 text-[8px]">${gt.desc}</span>
+            <button class="text-gray-600 hover:text-red-400" onclick="deleteGoldTransaction(${gt.id})"><i class="material-icons text-xs">delete</i></button>
+        `;
+        h.appendChild(div);
+    });
+}
+
+function deleteGoldTransaction(id) {
+    const idx = state.goldTransactions.findIndex(g => g.id === id);
+    if (idx === -1) return;
+    const gt = state.goldTransactions[idx];
+    if (gt.type === 'gain') state.gold = Math.max(0, state.gold - gt.amount);
+    else state.gold += gt.amount;
+    state.goldTransactions.splice(idx, 1);
+    saveState();
+    renderStats();
+    renderGoldHistory();
+    triggerAlert("Удалено");
+}
+
+// ====== ДНЕВНИК ======
+function selectMood(mood, btn) {
+    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
+    btn.classList.add('active-mood');
+    state.selectedMood = mood;
+}
+
+function renderDiary() {
+    const list = document.getElementById('diary-list');
+    list.innerHTML = '';
+    if (!state.diaryEntries.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-4">Нет записей</div>'; return; }
+    state.diaryEntries.forEach(e => {
+        const moodColor = e.mood === 'Отличное' ? '#00c853' :
+                          e.mood === 'Стабильное' ? '#ffd600' :
+                          e.mood === 'Спокойное' ? '#2979ff' :
+                          e.mood === 'Усталость' ? '#ff6d00' :
+                          e.mood === 'Выгорание' ? '#d50000' : '#888';
+        const div = document.createElement('div');
+        div.className = 'bg-white/5 border border-white/10 p-2 rounded';
+        div.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[9px] text-gray-500">${e.dateTime}</span>
+                    <div class="text-xs font-bold flex items-center gap-1">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${moodColor};"></span>
+                        ${e.mood || 'Нет'}
+                    </div>
+                </div>
+                <div class="flex gap-1">
+                    <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="startEditDiaryEntry(${e.id})"><i class="material-icons text-sm">edit</i></button>
+                    <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteDiaryEntry(${e.id})"><i class="material-icons text-sm">delete</i></button>
+                </div>
+            </div>
+            <p class="text-xs text-gray-300 mt-1 whitespace-pre-wrap">${e.text}</p>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function saveDiaryEntry() {
+    const text = document.getElementById('diary-entry-text').value.trim();
+    if (!text) { triggerAlert("Пусто"); return; }
+    if (editingDiaryId !== null) {
+        const entry = state.diaryEntries.find(e => e.id === editingDiaryId);
+        if (entry) {
+            entry.text = text;
+            entry.mood = state.selectedMood || 'Не указано';
+            entry.dateTime = `Ред: ${new Date().toLocaleString()}`;
+        }
+        editingDiaryId = null;
+        document.getElementById('diary-save-btn').innerText = "СОХРАНИТЬ";
+        document.getElementById('diary-cancel-btn').classList.add('hidden');
+        document.getElementById('diary-mode-indicator').classList.add('hidden');
+        triggerAlert("Обновлено");
+    } else {
+        state.diaryEntries.unshift({
+            id: Date.now(),
+            text,
+            mood: state.selectedMood || 'Не указано',
+            dateTime: new Date().toLocaleString()
+        });
+        addDailyLog('📝', 'Новая запись в дневнике');
+        triggerAlert("Сохранено");
+    }
+    document.getElementById('diary-entry-text').value = '';
+    state.selectedMood = '';
+    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
+    saveState();
+    renderDiary();
+}
+
+function startEditDiaryEntry(id) {
+    const entry = state.diaryEntries.find(e => e.id === id);
+    if (!entry) return;
+    editingDiaryId = id;
+    document.getElementById('diary-entry-text').value = entry.text;
+    state.selectedMood = entry.mood;
+    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
+    const moodMap = { 'Отличное':'mood-green', 'Стабильное':'mood-yellow', 'Спокойное':'mood-blue', 'Усталость':'mood-orange', 'Выгорание':'mood-red' };
+    // У нас нет id для кнопок, просто пройдёмся по ним
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+        if (btn.innerText.trim() === entry.mood) btn.classList.add('active-mood');
+    });
+    document.getElementById('diary-save-btn').innerText = "ОБНОВИТЬ";
+    document.getElementById('diary-cancel-btn').classList.remove('hidden');
+    document.getElementById('diary-mode-indicator').classList.remove('hidden');
+}
+
+function cancelDiaryEdit() {
+    editingDiaryId = null;
+    document.getElementById('diary-entry-text').value = '';
+    state.selectedMood = '';
+    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
+    document.getElementById('diary-save-btn').innerText = "СОХРАНИТЬ";
+    document.getElementById('diary-cancel-btn').classList.add('hidden');
+    document.getElementById('diary-mode-indicator').classList.add('hidden');
+}
+
+function deleteDiaryEntry(id) {
+    state.diaryEntries = state.diaryEntries.filter(e => e.id !== id);
+    saveState();
+    renderDiary();
+    triggerAlert("Удалено");
+}
+
+// ====== ОБЩЕЕ УДАЛЕНИЕ ======
+function deleteItem(arrName, id) {
+    state[arrName] = state[arrName].filter(x => x.id !== id);
+    saveState();
+    if (arrName === 'habits') renderHabits();
+    if (arrName === 'todos') renderTodos();
+    if (arrName === 'sportMissions') renderSportMissions();
+    if (arrName === 'shopItems') renderShopItems();
+    triggerAlert("Удалено");
+}
+
+// ====== СБРОС ======
+function resetSystem() {
+    if (confirm("Удалить все данные?")) {
+        localStorage.removeItem('cyberRPG_ios');
+        state = defaultState;
+        saveState();
+        location.reload();
+    }
+}
+
+// ====== ИНИЦИАЛИЗАЦИЯ ======
+window.onload = function() {
+    changeTheme(state.activeTheme);
+    renderStats();
+    renderHabits();
+    renderTodos();
+    renderSportMissions();
+    renderTransactions();
+    renderShopItems();
+    renderPurchaseHistory();
+    renderGoldHistory();
+    renderDiary();
+    updateDailySummary();
+    toggleHabitRewardFields();
+    toggleSportRewardFields();
+    triggerAlert("CyberRPG iOS готов");
+};
+</script>
+</body>
+</html>
