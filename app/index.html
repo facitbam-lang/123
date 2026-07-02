@@ -9,381 +9,303 @@
     <meta name="theme-color" content="#030308">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <title>CyberRPG Life Tracker</title>
+    <title>CyberRPG — Дневник жизни</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Share Tech Mono', 'Courier New', monospace;
-            -webkit-tap-highlight-color: transparent;
-        }
-        :root {
-            --neon-color: #00f0ff;
-            --neon-glow: 0 0 15px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.3);
-            --cyber-pink: #ff0055;
-            --cyber-green: #00ffaa;
-            --bg: #030308;
-            --panel: rgba(7, 7, 15, 0.92);
-        }
-        body {
-            background-color: var(--bg);
-            color: #e2e2ec;
-            height: 100vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            background-image: 
-                radial-gradient(circle at 50% 0%, #0a0a1a 0%, #030308 80%),
-                linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px),
-                linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
-            padding: 8px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Share Tech Mono', monospace; -webkit-tap-highlight-color: transparent; }
+        :root { --neon: #00f0ff; --neon-glow: 0 0 15px #00f0ff; --pink: #ff0055; --green: #00ffaa; --bg: #030308; --panel: rgba(7,7,15,0.94); }
+        body { background: var(--bg); color: #e2e2ec; min-height: 100vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px; background-image: radial-gradient(circle at 50% 0%, #0a0a1a 0%, #030308 80%); }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #05050a; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-color); box-shadow: var(--neon-glow); border-radius: 2px; }
-        .neon-border { border: 1px solid var(--neon-color); box-shadow: var(--neon-glow); }
-        .neon-text { color: var(--neon-color); text-shadow: var(--neon-glow); }
-        .cyber-clip {
-            clip-path: polygon(0px 0px, calc(100% - 10px) 0px, 100% 10px, 100% 100%, 10px 100%, 0px calc(100% - 10px));
-        }
-        .cyber-btn-clip {
-            clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
-        }
-        .bar-inner { transition: width 0.4s cubic-bezier(0.2, 0.9, 0.3, 1); }
-        .mood-btn {
-            transition: all 0.2s;
-            border: 2px solid transparent;
-            padding: 12px 0;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .mood-btn.active-mood {
-            border-color: var(--neon-color);
-            box-shadow: var(--neon-glow);
-            background: rgba(0, 240, 255, 0.15);
-        }
-        .hidden-field { display: none !important; }
-        @media (min-width: 768px) {
-            body { padding: 16px; }
-            .mood-btn { font-size: 13px; padding: 14px 0; }
-        }
-        #alert-box {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        /* Исправление: контейнеры с прокруткой */
-        .tab-content {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 16px;
-        }
-        .tab-content > * {
-            flex-shrink: 0;
-        }
-        .tab-content .flex-1 {
-            flex: 1;
-            min-height: 200px;
-        }
-        #habits-list, #todo-list, #sport-list, #diary-list,
-        #cash-history, #shop-list, #purchase-history, #gold-history {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+        ::-webkit-scrollbar-thumb { background: var(--neon); box-shadow: var(--neon-glow); border-radius: 2px; }
+        .neon-border { border: 1px solid var(--neon); box-shadow: var(--neon-glow); }
+        .neon-text { color: var(--neon); text-shadow: var(--neon-glow); }
+        .cyber-clip { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+        .cyber-btn { clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); transition: all 0.2s; }
+        .cyber-btn:hover { opacity: 0.85; transform: scale(0.98); }
+        .mood-btn { border: 2px solid transparent; padding: 10px 0; border-radius: 8px; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+        .mood-btn.active { border-color: var(--neon); box-shadow: var(--neon-glow); background: rgba(0,240,255,0.15); }
+        .day-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; margin: 2px auto; }
+        .day-circle:hover { transform: scale(1.1); border-color: var(--neon); }
+        .day-circle.empty { background: rgba(255,255,255,0.03); color: #444; }
+        .day-circle.today { border-color: var(--neon); box-shadow: var(--neon-glow); }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--panel); border: 1px solid var(--neon); box-shadow: var(--neon-glow); border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-content h2 { color: var(--neon); font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 16px; }
+        .modal-content input, .modal-content select, .modal-content textarea { background: #0a0a18; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; width: 100%; outline: none; }
+        .modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus { border-color: var(--neon); }
+        .modal-content textarea { resize: vertical; min-height: 80px; }
+        .modal-content .btn-primary { background: var(--neon); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 8px; width: 100%; font-size: 13px; cursor: pointer; }
+        .modal-content .btn-secondary { background: rgba(255,255,255,0.08); color: #aaa; padding: 10px; border: none; border-radius: 8px; width: 100%; font-size: 13px; cursor: pointer; }
+        .modal-content .btn-danger { background: var(--pink); color: #fff; padding: 10px; border: none; border-radius: 8px; width: 100%; font-size: 13px; cursor: pointer; }
+        .modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+        .day-detail-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+        .day-detail-item .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tab-btn { padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #888; cursor: pointer; transition: all 0.2s; }
+        .tab-btn.active { background: rgba(0,240,255,0.1); border-color: var(--neon); color: var(--neon); }
+        .hidden { display: none !important; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 6px; text-align: center; }
+        .stat-box .num { font-size: 16px; font-weight: bold; color: #fff; }
+        .stat-box .label { font-size: 8px; color: #666; text-transform: uppercase; }
+        .progress-track { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+        .progress-track .fill { height: 100%; background: var(--neon); box-shadow: var(--neon-glow); transition: width 0.4s; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .day-label { text-align: center; font-size: 8px; color: #444; padding: 4px 0; text-transform: uppercase; }
+        @media (min-width: 500px) { .day-circle { width: 44px; height: 44px; font-size: 12px; } }
     </style>
 </head>
 <body>
 
-<div id="app" class="flex flex-col h-full max-w-4xl mx-auto">
+<div id="app" class="max-w-2xl mx-auto">
 
     <!-- ====== ВЕРХНЯЯ ПАНЕЛЬ ====== -->
     <div class="cyber-clip neon-border bg-[var(--panel)] p-4 flex flex-wrap items-center justify-between gap-2 backdrop-blur-md mb-3">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 border-2 border-dashed border-[var(--neon-color)] rounded-full flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,240,255,0.1)]">
-                <i class="material-icons text-3xl neon-text">psychology</i>
+            <div class="w-11 h-11 border-2 border-dashed border-[var(--neon)] rounded-full flex items-center justify-center">
+                <i class="material-icons text-2xl neon-text">psychology</i>
             </div>
             <div>
-                <div class="neon-text text-lg font-bold tracking-widest">CYBER_RPG</div>
-                <div class="text-[10px] text-gray-400">v4.0 · iOS</div>
+                <div class="neon-text text-base font-bold tracking-widest">CYBER_RPG</div>
+                <div class="text-[9px] text-gray-500">дневник · календарь</div>
             </div>
         </div>
-        <div class="flex gap-3 text-xs">
+        <div class="flex gap-2 text-xs">
             <div class="bg-white/5 px-3 py-1 rounded border border-white/10 text-center">
-                <span class="text-gray-500 block text-[9px]">LVL</span>
-                <strong id="char-lvl" class="text-white text-lg">1</strong>
+                <div class="text-[8px] text-gray-500">LVL</div>
+                <strong id="char-lvl" class="text-white text-base">1</strong>
             </div>
             <div class="bg-white/5 px-3 py-1 rounded border border-white/10 text-center">
-                <span class="text-gray-500 block text-[9px]">GOLD</span>
-                <strong id="char-gold" class="text-yellow-400 text-lg">0</strong>
+                <div class="text-[8px] text-gray-500">GOLD</div>
+                <strong id="char-gold" class="text-yellow-400 text-base">0</strong>
+            </div>
+            <div class="bg-white/5 px-3 py-1 rounded border border-white/10 text-center">
+                <div class="text-[8px] text-gray-500">XP</div>
+                <div id="xp-text" class="text-[10px] neon-text">0/100</div>
             </div>
         </div>
     </div>
 
-    <!-- ====== СТАТЫ ====== -->
-    <div class="grid grid-cols-4 gap-2 mb-3">
-        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
-            <span class="text-[9px] text-gray-500">INT</span>
-            <div id="stat-int" class="text-sm font-bold text-white">10</div>
-        </div>
-        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
-            <span class="text-[9px] text-gray-500">STR</span>
-            <div id="stat-str" class="text-sm font-bold text-white">10</div>
-        </div>
-        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
-            <span class="text-[9px] text-gray-500">XP</span>
-            <div id="xp-text" class="text-[10px] neon-text">0/100</div>
-        </div>
-        <div class="bg-white/5 border border-white/10 p-2 text-center rounded">
-            <span class="text-[9px] text-gray-500">HP</span>
-            <div id="hp-text" class="text-[10px] text-[var(--cyber-pink)]">100</div>
-        </div>
-    </div>
-
-    <!-- ====== ПРОГРЕСС-БАРЫ ====== -->
+    <!-- ====== СТАТЫ + ПРОГРЕСС ====== -->
     <div class="flex flex-col gap-2 mb-3">
-        <div>
-            <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/10">
-                <div id="xp-bar" class="bar-inner h-full bg-[var(--neon-color)] shadow-[var(--neon-glow)]" style="width:0%"></div>
-            </div>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="num" id="stat-int">10</div><div class="label">INT</div></div>
+            <div class="stat-box"><div class="num" id="stat-str">10</div><div class="label">STR</div></div>
+            <div class="stat-box"><div class="num" id="stat-hp">100</div><div class="label">HP</div></div>
+            <div class="stat-box"><div class="num" id="stat-balance">0₽</div><div class="label">БАЛАНС</div></div>
         </div>
-        <div>
-            <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/10">
-                <div id="hp-bar" class="bar-inner h-full bg-[var(--cyber-pink)] shadow-[0_0_10px_#ff0055]" style="width:100%"></div>
-            </div>
-        </div>
+        <div><div class="progress-track"><div class="fill" id="xp-bar" style="width:0%"></div></div></div>
     </div>
 
-    <!-- ====== СВОДКА ДНЯ ====== -->
-    <div class="bg-white/5 border border-white/10 p-2 rounded mb-3">
-        <div class="text-[9px] text-gray-400 font-bold uppercase flex items-center gap-1">
-            <i class="material-icons text-sm">today</i> СВОДКА ДНЯ
-        </div>
-        <div id="daily-summary" class="text-[10px] text-gray-300 mt-1 max-h-[40px] overflow-y-auto"></div>
-    </div>
-
-    <!-- ====== НАВИГАЦИЯ (ВКЛАДКИ) ====== -->
+    <!-- ====== НАВИГАЦИЯ ====== -->
     <div class="flex gap-1 mb-3 overflow-x-auto pb-1">
-        <button class="nav-button active flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('quests', this)">КВЕСТЫ</button>
-        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('sport', this)">СПОРТ</button>
-        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('finance', this)">ФИНАНСЫ</button>
-        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('diary', this)">ДНЕВНИК</button>
-        <button class="nav-button flex-1 bg-black/50 border border-white/10 text-gray-400 p-2 text-center text-[10px] font-bold uppercase transition-all hover:border-[var(--neon-color)] cyber-btn-clip" onclick="switchTab('settings', this)">НАСТР</button>
+        <button class="tab-btn active" onclick="showTab('calendar')">📅 КАЛЕНДАРЬ</button>
+        <button class="tab-btn" onclick="showTab('habits')">🔄 ПРИВЫЧКИ</button>
+        <button class="tab-btn" onclick="showTab('sport')">💪 СПОРТ</button>
+        <button class="tab-btn" onclick="showTab('finance')">💰 ФИНАНСЫ</button>
+        <button class="tab-btn" onclick="showTab('settings')">⚙️ НАСТР</button>
     </div>
 
-    <!-- ====== КОНТЕНТ ВКЛАДОК ====== -->
-    <div class="flex-1 overflow-hidden relative">
-
-        <!-- КВЕСТЫ -->
-        <section id="tab-quests" class="tab-content absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <!-- Привычки -->
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">sync</i> ПРИВЫЧКИ
-                </h2>
-                <div class="space-y-2 mb-3">
-                    <input type="text" id="habit-name" placeholder="Описание..." class="w-full bg-[#090912] border border-white/10 text-white p-3 text-sm rounded focus:outline-none focus:border-[var(--neon-color)]">
-                    <div class="flex gap-2 flex-wrap">
-                        <select id="habit-stat" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded focus:outline-none">
-                            <option value="INT">INT</option><option value="STR">STR</option>
-                        </select>
-                        <select id="habit-reward-type" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded focus:outline-none" onchange="toggleHabitRewardFields()">
-                            <option value="per_step">За шаг</option><option value="per_target">Бонус за цель</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-2 flex-wrap">
-                        <label class="flex items-center gap-1 text-xs text-gray-400 bg-[#090912] p-2 rounded border border-white/10">
-                            <input type="checkbox" id="habit-has-scale" onchange="toggleHabitScaleField()" class="accent-[var(--neon-color)]"> ШКАЛА
-                        </label>
-                        <input type="number" id="habit-scale-target" placeholder="Цель" value="10" class="hidden w-16 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                        <input type="number" id="habit-gold-per-step" placeholder="Золота за шаг" value="1" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                        <input type="number" id="habit-gold-bonus" placeholder="Бонус за цель" value="5" class="hidden-field flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                    </div>
-                    <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip hover:opacity-90" onclick="addHabit()">+ ДОБАВИТЬ</button>
-                </div>
-                <ul id="habits-list" class="space-y-2 max-h-[200px] overflow-y-auto"></ul>
+    <!-- ====== ВКЛАДКА: КАЛЕНДАРЬ ====== -->
+    <div id="tab-calendar" class="tab-content">
+        <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+            <div class="flex justify-between items-center mb-3">
+                <button class="bg-white/5 px-3 py-1 rounded text-xs" onclick="changeMonth(-1)">◀</button>
+                <span class="neon-text text-sm font-bold" id="month-label">Январь 2026</span>
+                <button class="bg-white/5 px-3 py-1 rounded text-xs" onclick="changeMonth(1)">▶</button>
             </div>
-
-            <!-- Миссии -->
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">track_changes</i> МИССИИ
-                </h2>
-                <div class="flex gap-2 mb-3 flex-wrap">
-                    <input type="text" id="todo-name" placeholder="Название..." class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded focus:outline-none">
-                    <select id="todo-stat" class="bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                        <option value="INT">INT</option><option value="STR">STR</option>
-                    </select>
-                    <input type="number" id="todo-gold" placeholder="Золото" value="25" class="w-20 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                </div>
-                <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip mb-3" onclick="addTodo()">+ ЗАГРУЗИТЬ</button>
-                <ul id="todo-list" class="space-y-2 max-h-[150px] overflow-y-auto"></ul>
+            <div class="calendar-grid">
+                <div class="day-label">Пн</div><div class="day-label">Вт</div><div class="day-label">Ср</div>
+                <div class="day-label">Чт</div><div class="day-label">Пт</div><div class="day-label">Сб</div><div class="day-label">Вс</div>
+                <div id="calendar-grid"></div>
             </div>
-        </section>
-
-        <!-- СПОРТ -->
-        <section id="tab-sport" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">directions_run</i> ТРЕНИРОВКИ
-                </h2>
-                <div class="space-y-2 mb-3">
-                    <input type="text" id="sport-name" placeholder="Название..." class="w-full bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
-                    <div class="flex gap-2 flex-wrap">
-                        <input type="number" id="sport-target" placeholder="Цель" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                        <input type="text" id="sport-unit" placeholder="Ед." class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                    </div>
-                    <div class="flex gap-2 flex-wrap">
-                        <select id="sport-reward-type" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded" onchange="toggleSportRewardFields()">
-                            <option value="per_step">За шаг</option><option value="per_target">Бонус за цель</option>
-                        </select>
-                        <input type="number" id="sport-gold-per-step" placeholder="Золота за шаг" value="2" class="flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                        <input type="number" id="sport-gold-bonus" placeholder="Бонус" value="10" class="hidden-field flex-1 bg-[#090912] border border-white/10 text-white p-2 text-xs rounded">
-                    </div>
-                    <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addSportMission()">+ ДОБАВИТЬ</button>
+            <!-- Сводка выбранного дня -->
+            <div id="day-detail" class="mt-4 border-t border-white/10 pt-3">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-gray-400" id="day-detail-label">Выберите день</span>
+                    <button class="text-[10px] text-[var(--neon)]" onclick="openModal('diary-modal')">+ Запись</button>
                 </div>
-                <ul id="sport-list" class="space-y-2 max-h-[300px] overflow-y-auto"></ul>
+                <div id="day-detail-content" class="text-xs text-gray-400">Нажмите на день в календаре</div>
             </div>
-        </section>
-
-        <!-- ФИНАНСЫ -->
-        <section id="tab-finance" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">attach_money</i> ФИНАНСЫ
-                </h2>
-                <div class="text-2xl font-bold mb-3 neon-text text-center">
-                    БАЛАНС: <span id="fin-balance" class="text-[var(--cyber-green)]">0 ₽</span>
-                </div>
-                <div class="flex gap-2 mb-2">
-                    <input type="number" id="cash-amount" placeholder="Сумма ₽" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
-                    <input type="text" id="cash-desc" placeholder="Описание" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
-                </div>
-                <div class="flex gap-2 mb-3">
-                    <button class="flex-1 bg-[var(--cyber-green)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addTransaction('income')">+ ДОХОД</button>
-                    <button class="flex-1 bg-[var(--cyber-pink)] text-white p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="addTransaction('expense')">- РАСХОД</button>
-                </div>
-                <div id="cash-history" class="max-h-[120px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5"></div>
-
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mt-4 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">shopping_cart</i> МАГАЗИН
-                </h2>
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="shop-item-name" placeholder="Товар" class="flex-1 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
-                    <input type="number" id="shop-item-price" placeholder="Цена" value="50" class="w-20 bg-[#090912] border border-white/10 text-white p-3 text-sm rounded">
-                </div>
-                <button class="w-full bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip mb-3" onclick="addShopItem()">+ В МАГАЗИН</button>
-                <div id="shop-list" class="max-h-[150px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5"></div>
-
-                <div class="mt-3">
-                    <h3 class="text-[10px] text-gray-400 font-bold uppercase">// ИСТОРИЯ ПОКУПОК</h3>
-                    <div id="purchase-history" class="max-h-[80px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5 mt-1"></div>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-[10px] text-gray-400 font-bold uppercase">// ИСТОРИЯ ЗОЛОТА</h3>
-                    <div id="gold-history" class="max-h-[100px] overflow-y-auto space-y-1 bg-black/30 p-2 rounded border border-white/5 mt-1"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ДНЕВНИК -->
-        <section id="tab-diary" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">sentiment_satisfied</i> ДНЕВНИК
-                </h2>
-                <div class="grid grid-cols-5 gap-2 mb-3">
-                    <button class="mood-btn" style="background:#00c853;" onclick="selectMood('Отличное', this)">ОТЛ</button>
-                    <button class="mood-btn" style="background:#ffd600;color:#000;" onclick="selectMood('Стабильное', this)">СТАБ</button>
-                    <button class="mood-btn" style="background:#2979ff;" onclick="selectMood('Спокойное', this)">СПОК</button>
-                    <button class="mood-btn" style="background:#ff6d00;" onclick="selectMood('Усталость', this)">УСТ</button>
-                    <button class="mood-btn" style="background:#d50000;" onclick="selectMood('Выгорание', this)">ВЫГ</button>
-                </div>
-                <div class="flex flex-col gap-2 mb-3">
-                    <span id="diary-mode-indicator" class="edit-mode-indicator hidden text-yellow-400 text-[10px]">// РЕДАКТИРОВАНИЕ</span>
-                    <textarea id="diary-entry-text" rows="3" placeholder="Твои мысли..." class="bg-[#090912] border border-white/10 text-white p-3 text-sm rounded resize-none"></textarea>
-                    <div class="flex gap-2">
-                        <button id="diary-save-btn" class="flex-1 bg-[var(--neon-color)] text-black p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="saveDiaryEntry()">СОХРАНИТЬ</button>
-                        <button id="diary-cancel-btn" class="hidden bg-white/10 text-white px-4 text-xs font-bold uppercase rounded" onclick="cancelDiaryEdit()">ОТМЕНА</button>
-                    </div>
-                </div>
-                <div id="diary-list" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
-            </div>
-        </section>
-
-        <!-- НАСТРОЙКИ -->
-        <section id="tab-settings" class="tab-content hidden absolute inset-0 overflow-y-auto flex flex-col gap-3 pb-4">
-            <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
-                <h2 class="text-sm neon-text flex items-center gap-2 border-b border-white/10 pb-2 mb-3 font-bold uppercase">
-                    <i class="material-icons text-base">palette</i> НАСТРОЙКИ
-                </h2>
-                <div class="mb-4">
-                    <p class="text-xs text-gray-400 mb-2">НЕОНОВЫЙ ЦВЕТ:</p>
-                    <div class="flex gap-2">
-                        <button class="w-10 h-10 rounded-full border border-black" style="background:#00f0ff;" onclick="changeTheme('#00f0ff')"></button>
-                        <button class="w-10 h-10 rounded-full border border-black" style="background:#ff0055;" onclick="changeTheme('#ff0055')"></button>
-                        <button class="w-10 h-10 rounded-full border border-black" style="background:#39ff14;" onclick="changeTheme('#39ff14')"></button>
-                        <button class="w-10 h-10 rounded-full border border-black" style="background:#ffaa00;" onclick="changeTheme('#ffaa00')"></button>
-                        <button class="w-10 h-10 rounded-full border border-black" style="background:#a020f0;" onclick="changeTheme('#a020f0')"></button>
-                    </div>
-                </div>
-                <div class="border-t border-white/5 pt-4">
-                    <h3 class="text-xs text-[var(--cyber-pink)] font-bold mb-2 uppercase">DANGER ZONE</h3>
-                    <button class="w-full bg-[var(--cyber-pink)] text-white p-3 text-xs font-bold uppercase cyber-btn-clip" onclick="resetSystem()">ПОЛНЫЙ СБРОС</button>
-                </div>
-            </div>
-        </section>
-
+        </div>
     </div>
-</div>
 
-<!-- ====== СИСТЕМНЫЙ АЛЕРТ ====== -->
-<div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#070710] border border-[var(--neon-color)] shadow-[var(--neon-glow)] p-3 rounded text-xs font-bold transition-transform duration-300 translate-y-[200%] z-50 text-center max-w-xs">
-    // SYSTEM: ONLINE
+    <!-- ====== ВКЛАДКА: ПРИВЫЧКИ ====== -->
+    <div id="tab-habits" class="tab-content hidden">
+        <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-sm neon-text font-bold">ПРИВЫЧКИ</h2>
+                <button class="bg-[var(--neon)] text-black px-3 py-1 text-xs font-bold rounded cyber-btn" onclick="openModal('habit-modal')">+ НОВАЯ</button>
+            </div>
+            <div id="habits-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- ====== ВКЛАДКА: СПОРТ ====== -->
+    <div id="tab-sport" class="tab-content hidden">
+        <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-sm neon-text font-bold">ТРЕНИРОВКИ</h2>
+                <button class="bg-[var(--neon)] text-black px-3 py-1 text-xs font-bold rounded cyber-btn" onclick="openModal('sport-modal')">+ НОВАЯ</button>
+            </div>
+            <div id="sport-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- ====== ВКЛАДКА: ФИНАНСЫ ====== -->
+    <div id="tab-finance" class="tab-content hidden">
+        <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-sm neon-text font-bold">ФИНАНСЫ</h2>
+                <button class="bg-[var(--neon)] text-black px-3 py-1 text-xs font-bold rounded cyber-btn" onclick="openModal('finance-modal')">+ ТРАНЗАКЦИЯ</button>
+            </div>
+            <div id="finance-list" class="space-y-1 max-h-[300px] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- ====== ВКЛАДКА: НАСТРОЙКИ ====== -->
+    <div id="tab-settings" class="tab-content hidden">
+        <div class="cyber-clip neon-border bg-[var(--panel)] p-4">
+            <h2 class="text-sm neon-text font-bold mb-3">НАСТРОЙКИ</h2>
+            <div class="mb-4">
+                <p class="text-xs text-gray-400 mb-2">НЕОНОВЫЙ ЦВЕТ:</p>
+                <div class="flex gap-2">
+                    <button class="w-9 h-9 rounded-full border border-black" style="background:#00f0ff;" onclick="changeTheme('#00f0ff')"></button>
+                    <button class="w-9 h-9 rounded-full border border-black" style="background:#ff0055;" onclick="changeTheme('#ff0055')"></button>
+                    <button class="w-9 h-9 rounded-full border border-black" style="background:#39ff14;" onclick="changeTheme('#39ff14')"></button>
+                    <button class="w-9 h-9 rounded-full border border-black" style="background:#ffaa00;" onclick="changeTheme('#ffaa00')"></button>
+                    <button class="w-9 h-9 rounded-full border border-black" style="background:#a020f0;" onclick="changeTheme('#a020f0')"></button>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-4">
+                <button class="w-full bg-[var(--pink)] text-white p-3 text-xs font-bold uppercase cyber-btn" onclick="resetSystem()">ПОЛНЫЙ СБРОС</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== МОДАЛКА: НОВАЯ ПРИВЫЧКА ====== -->
+    <div id="habit-modal" class="modal">
+        <div class="modal-content relative">
+            <button class="modal-close" onclick="closeModal('habit-modal')">✕</button>
+            <h2>НОВАЯ ПРИВЫЧКА</h2>
+            <div class="space-y-3">
+                <input id="habit-name-input" placeholder="Название привычки..." class="w-full">
+                <select id="habit-stat-input" class="w-full">
+                    <option value="INT">Качает INT</option>
+                    <option value="STR">Качает STR</option>
+                </select>
+                <select id="habit-type-input" class="w-full">
+                    <option value="daily">Ежедневная (сброс в 00:00)</option>
+                    <option value="scale">Со шкалой (без сброса)</option>
+                </select>
+                <input id="habit-target-input" type="number" placeholder="Цель за день (если daily)" value="1" class="w-full">
+                <input id="habit-gold-input" type="number" placeholder="Золото за выполнение" value="2" class="w-full">
+                <button class="btn-primary" onclick="addHabit()">СОЗДАТЬ ПРИВЫЧКУ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== МОДАЛКА: НОВАЯ ТРЕНИРОВКА ====== -->
+    <div id="sport-modal" class="modal">
+        <div class="modal-content relative">
+            <button class="modal-close" onclick="closeModal('sport-modal')">✕</button>
+            <h2>НОВАЯ ТРЕНИРОВКА</h2>
+            <div class="space-y-3">
+                <input id="sport-name-input" placeholder="Название тренировки..." class="w-full">
+                <select id="sport-progression-input" class="w-full">
+                    <option value="+1">+1 за день (прогрессия)</option>
+                    <option value="+X">+X за день (ручной шаг)</option>
+                    <option value="manual">Ручной ввод (без прогрессии)</option>
+                </select>
+                <input id="sport-step-input" type="number" placeholder="Шаг прогрессии (если +X)" value="2" class="w-full">
+                <input id="sport-target-input" type="number" placeholder="Цель за день" value="10" class="w-full">
+                <input id="sport-unit-input" placeholder="Единица измерения (раз, км, мин)" value="раз" class="w-full">
+                <input id="sport-gold-input" type="number" placeholder="Золото за выполнение" value="5" class="w-full">
+                <button class="btn-primary" onclick="addSport()">СОЗДАТЬ ТРЕНИРОВКУ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== МОДАЛКА: НОВАЯ ЗАПИСЬ В ДНЕВНИК ====== -->
+    <div id="diary-modal" class="modal">
+        <div class="modal-content relative">
+            <button class="modal-close" onclick="closeModal('diary-modal')">✕</button>
+            <h2>ЗАПИСЬ В ДНЕВНИК</h2>
+            <div class="space-y-3">
+                <input id="diary-date-input" type="date" class="w-full">
+                <select id="diary-mood-input" class="w-full">
+                    <option value="Отличное">🟢 Отличное</option>
+                    <option value="Стабильное">🟡 Стабильное</option>
+                    <option value="Спокойное">🔵 Спокойное</option>
+                    <option value="Усталость">🟠 Усталость</option>
+                    <option value="Выгорание">🔴 Выгорание</option>
+                </select>
+                <textarea id="diary-text-input" placeholder="Твои мысли за этот день..." rows="4"></textarea>
+                <button class="btn-primary" onclick="addDiaryEntry()">СОХРАНИТЬ ЗАПИСЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== МОДАЛКА: НОВАЯ ТРАНЗАКЦИЯ ====== -->
+    <div id="finance-modal" class="modal">
+        <div class="modal-content relative">
+            <button class="modal-close" onclick="closeModal('finance-modal')">✕</button>
+            <h2>НОВАЯ ТРАНЗАКЦИЯ</h2>
+            <div class="space-y-3">
+                <input id="finance-amount-input" type="number" placeholder="Сумма (₽)" class="w-full">
+                <input id="finance-desc-input" placeholder="Описание" class="w-full">
+                <input id="finance-date-input" type="date" class="w-full">
+                <div class="flex gap-2">
+                    <button class="btn-primary flex-1" onclick="addFinance('income')">+ ДОХОД</button>
+                    <button class="btn-danger flex-1" onclick="addFinance('expense')">- РАСХОД</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== СИСТЕМНЫЙ АЛЕРТ ====== -->
+    <div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#070710] border border-[var(--neon)] shadow-[var(--neon-glow)] p-3 rounded text-xs font-bold transition-all duration-300 translate-y-[200%] z-50 text-center max-w-xs">
+        // SYSTEM: ONLINE
+    </div>
 </div>
 
 <script>
-// ====== ПОЛНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ======
-let defaultState = {
-    lvl: 1, xp: 0, hp: 100, gold: 0, int: 10, str: 10, balance: 0,
+// ====== СОСТОЯНИЕ ======
+let state = {
+    gold: 0, xp: 0, lvl: 1, int: 10, str: 10, hp: 100, balance: 0,
     activeTheme: '#00f0ff',
-    selectedMood: '',
-    habits: [
-        { id: 1, name: "Утренняя зарядка", stat: "STR", hasScale: true, scaleCurrent: 0, scaleTarget: 10, rewardType: "per_target", goldPerStep: 1, goldBonus: 5, streak: 0, lastDate: null },
-        { id: 2, name: "Чтение 30 мин", stat: "INT", hasScale: false, rewardType: "per_step", goldPerStep: 2, goldBonus: 0, streak: 0, lastDate: null }
-    ],
-    todos: [
-        { id: 1, name: "Настроить трекер", stat: "INT", gold: 25 }
-    ],
-    sportMissions: [
-        { id: 1, name: "Отжимания", target: 40, current: 0, unit: "раз", rewardType: "per_step", goldPerStep: 2, goldBonus: 10 },
-        { id: 2, name: "Растяжка", target: 5, current: 0, unit: "мин", rewardType: "per_target", goldPerStep: 1, goldBonus: 5 }
-    ],
-    shopItems: [
-        { id: 1, name: "🎮 Час на игру", price: 50 },
-        { id: 2, name: "🍕 Читмил", price: 100 }
-    ],
-    purchaseHistory: [],
-    transactions: [],
-    goldTransactions: [],
-    diaryEntries: [],
-    dailyLog: []
+    currentDate: new Date(),
+    selectedDate: new Date().toDateString(),
+    habits: [],
+    sports: [],
+    diary: [],
+    finance: [],
+    dayLogs: {}
 };
 
-let state = JSON.parse(localStorage.getItem('cyberRPG_ios')) || defaultState;
-if (!state.shopItems) state.shopItems = [];
-if (!state.purchaseHistory) state.purchaseHistory = [];
-if (!state.sportMissions) state.sportMissions = [];
-if (!state.goldTransactions) state.goldTransactions = [];
-if (!state.transactions) state.transactions = [];
-if (!state.diaryEntries) state.diaryEntries = [];
-if (!state.dailyLog) state.dailyLog = [];
-if (state.balance === undefined) state.balance = 0;
-if (state.gold === undefined) state.gold = 0;
+// Загрузка из localStorage
+const saved = localStorage.getItem('cyberRPG_v2');
+if (saved) {
+    try {
+        const parsed = JSON.parse(saved);
+        Object.assign(state, parsed);
+        // Восстанавливаем даты
+        state.currentDate = new Date(parsed.currentDate || Date.now());
+        state.selectedDate = parsed.selectedDate || new Date().toDateString();
+    } catch(e) { console.warn('Ошибка загрузки'); }
+}
 
-let editingDiaryId = null;
+// ====== ВСПОМОГАТЕЛЬНЫЕ ======
+function saveState() {
+    const toSave = { ...state };
+    // Преобразуем даты в строки для сохранения
+    toSave.currentDate = state.currentDate.toISOString();
+    toSave.selectedDate = state.selectedDate;
+    localStorage.setItem('cyberRPG_v2', JSON.stringify(toSave));
+}
 
 function triggerAlert(msg) {
     const box = document.getElementById('alert-box');
@@ -392,707 +314,505 @@ function triggerAlert(msg) {
     setTimeout(() => box.classList.add('translate-y-[200%]'), 2500);
 }
 
-function saveState() {
-    localStorage.setItem('cyberRPG_ios', JSON.stringify(state));
-}
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-function switchTab(tabId, btn) {
-    document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden'); });
-    document.querySelectorAll('.nav-button').forEach(el => { el.classList.remove('active'); el.style.borderColor = 'rgba(255,255,255,0.05)'; el.style.color = '#888'; });
-    document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-    btn.classList.add('active');
-    btn.style.borderColor = state.activeTheme;
-    btn.style.color = state.activeTheme;
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById(`tab-${id}`).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        if (el.textContent.includes('КАЛЕНДАРЬ') && id === 'calendar') el.classList.add('active');
+        else if (el.textContent.includes('ПРИВЫЧКИ') && id === 'habits') el.classList.add('active');
+        else if (el.textContent.includes('СПОРТ') && id === 'sport') el.classList.add('active');
+        else if (el.textContent.includes('ФИНАНСЫ') && id === 'finance') el.classList.add('active');
+        else if (el.textContent.includes('НАСТР') && id === 'settings') el.classList.add('active');
+    });
 }
 
 function changeTheme(color) {
     state.activeTheme = color;
-    document.documentElement.style.setProperty('--neon-color', color);
+    document.documentElement.style.setProperty('--neon', color);
     document.documentElement.style.setProperty('--neon-glow', `0 0 15px ${color}, 0 0 30px ${color}4d`);
-    document.querySelector('.nav-button.active')?.style.setProperty('border-color', color);
-    document.querySelector('.nav-button.active')?.style.setProperty('color', color);
     saveState();
 }
 
-// ====== ОТРИСОВКА СТАТОВ ======
-function renderStats() {
-    document.getElementById('char-lvl').innerText = state.lvl;
-    document.getElementById('char-gold').innerText = state.gold;
-    document.getElementById('stat-int').innerText = state.int;
-    document.getElementById('stat-str').innerText = state.str;
-    document.getElementById('fin-balance').innerText = `${state.balance.toLocaleString()} ₽`;
-    document.getElementById('xp-text').innerHTML = `${state.xp}/100`;
-    document.getElementById('xp-bar').style.width = `${Math.min(100, state.xp)}%`;
-    document.getElementById('hp-text').innerHTML = state.hp;
-    document.getElementById('hp-bar').style.width = `${state.hp}%`;
+function formatDate(date) {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function addXP(amount) {
-    state.xp += amount;
-    while (state.xp >= 100) {
-        state.lvl += 1;
-        state.xp -= 100;
-        state.gold += 50;
-        logGoldTransaction(`Повышение уровня до LVL ${state.lvl}`, 50, 'gain');
-        triggerAlert(`LEVEL ${state.lvl} REACHED`);
+function parseDate(str) {
+    const parts = str.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+}
+
+function todayStr() {
+    const d = new Date();
+    return formatDate(d);
+}
+
+function getDayKey(date) {
+    return formatDate(date);
+}
+
+function getDayData(date) {
+    const key = getDayKey(date);
+    if (!state.dayLogs[key]) {
+        state.dayLogs[key] = { mood: null, diary: [], habits: [], sports: [], finance: [] };
     }
-    saveState();
-    renderStats();
+    return state.dayLogs[key];
 }
 
-// ====== СВОДКА ДНЯ ======
-function updateDailySummary() {
-    const summary = document.getElementById('daily-summary');
-    const today = new Date().toDateString();
-    const todayLogs = state.dailyLog.filter(log => log.date === today);
-    if (todayLogs.length === 0) {
-        summary.innerHTML = '<span class="text-gray-500">Нет активности</span>';
+// ====== РЕНДЕР КАЛЕНДАРЯ ======
+function renderCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    const monthLabel = document.getElementById('month-label');
+    const year = state.currentDate.getFullYear();
+    const month = state.currentDate.getMonth();
+    monthLabel.textContent = `${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    const todayStr = getDayKey(today);
+    const selectedStr = state.selectedDate;
+    
+    grid.innerHTML = '';
+    // Пустые ячейки до первого дня (пн = 1)
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+    for (let i = 0; i < offset; i++) {
+        const div = document.createElement('div');
+        div.className = 'day-circle empty';
+        div.textContent = '';
+        grid.appendChild(div);
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, month, d);
+        const key = getDayKey(date);
+        const dayData = state.dayLogs[key];
+        const div = document.createElement('div');
+        div.className = 'day-circle';
+        div.textContent = d;
+        
+        // Цвет настроения
+        if (dayData && dayData.mood) {
+            const moodColors = {
+                'Отличное': '#00c853',
+                'Стабильное': '#ffd600',
+                'Спокойное': '#2979ff',
+                'Усталость': '#ff6d00',
+                'Выгорание': '#d50000'
+            };
+            div.style.background = moodColors[dayData.mood] || 'rgba(255,255,255,0.05)';
+            div.style.color = '#fff';
+            div.style.borderColor = 'transparent';
+        } else {
+            div.style.background = 'rgba(255,255,255,0.03)';
+            div.style.color = '#888';
+        }
+        
+        if (key === todayStr) {
+            div.classList.add('today');
+        }
+        if (key === selectedStr) {
+            div.style.borderColor = 'var(--neon)';
+            div.style.boxShadow = 'var(--neon-glow)';
+        }
+        
+        div.onclick = () => { selectDay(key); };
+        grid.appendChild(div);
+    }
+    
+    // Заполняем пустые ячейки в конце
+    const totalCells = offset + daysInMonth;
+    const remainder = totalCells % 7;
+    if (remainder > 0) {
+        for (let i = 0; i < 7 - remainder; i++) {
+            const div = document.createElement('div');
+            div.className = 'day-circle empty';
+            div.textContent = '';
+            grid.appendChild(div);
+        }
+    }
+    
+    // Показываем выбранный день
+    if (state.selectedDate) {
+        renderDayDetail(state.selectedDate);
+    }
+}
+
+function changeMonth(delta) {
+    state.currentDate.setMonth(state.currentDate.getMonth() + delta);
+    renderCalendar();
+    saveState();
+}
+
+function selectDay(key) {
+    state.selectedDate = key;
+    renderCalendar();
+    saveState();
+}
+
+function renderDayDetail(key) {
+    const label = document.getElementById('day-detail-label');
+    const content = document.getElementById('day-detail-content');
+    const data = state.dayLogs[key];
+    if (!data) {
+        label.textContent = `📅 ${key}`;
+        content.innerHTML = '<span class="text-gray-500">Нет записей за этот день</span>';
         return;
     }
-    summary.innerHTML = todayLogs.slice(0, 5).map(log => 
-        `<div class="text-[10px] text-gray-300 border-b border-white/5 py-0.5">${log.icon} ${log.text}</div>`
-    ).join('');
-}
-
-function addDailyLog(icon, text) {
-    const today = new Date().toDateString();
-    state.dailyLog.unshift({ date: today, icon, text, time: new Date().toLocaleTimeString() });
-    if (state.dailyLog.length > 50) state.dailyLog = state.dailyLog.slice(0, 50);
-    saveState();
-    updateDailySummary();
+    label.textContent = `📅 ${key} ${data.mood ? '· ' + data.mood : ''}`;
+    
+    let html = '';
+    // Дневник
+    if (data.diary && data.diary.length) {
+        html += '<div class="text-[10px] text-gray-400 mt-2">📝 ДНЕВНИК</div>';
+        data.diary.forEach(entry => {
+            html += `<div class="day-detail-item"><div class="text-xs">${entry.text}</div></div>`;
+        });
+    }
+    // Тренировки
+    if (data.sports && data.sports.length) {
+        html += '<div class="text-[10px] text-gray-400 mt-2">💪 ТРЕНИРОВКИ</div>';
+        data.sports.forEach(s => {
+            html += `<div class="day-detail-item flex justify-between"><span>${s.name}</span><span class="text-green-400">+${s.gold || 0} GOLD</span></div>`;
+        });
+    }
+    // Финансы
+    if (data.finance && data.finance.length) {
+        html += '<div class="text-[10px] text-gray-400 mt-2">💰 ФИНАНСЫ</div>';
+        data.finance.forEach(f => {
+            const sign = f.type === 'income' ? '+' : '-';
+            const color = f.type === 'income' ? 'text-green-400' : 'text-pink-400';
+            html += `<div class="day-detail-item flex justify-between"><span>${f.desc}</span><span class="${color}">${sign}${f.amount} ₽</span></div>`;
+        });
+    }
+    if (!html) {
+        html = '<span class="text-gray-500">Нет записей за этот день</span>';
+    }
+    content.innerHTML = html;
 }
 
 // ====== ПРИВЫЧКИ ======
-function toggleHabitScaleField() {
-    const checked = document.getElementById('habit-has-scale').checked;
-    document.getElementById('habit-scale-target').classList.toggle('hidden', !checked);
-}
-function toggleHabitRewardFields() {
-    const type = document.getElementById('habit-reward-type').value;
-    document.getElementById('habit-gold-per-step').classList.toggle('hidden-field', type === 'per_target');
-    document.getElementById('habit-gold-bonus').classList.toggle('hidden-field', type === 'per_step');
-}
-
 function renderHabits() {
     const list = document.getElementById('habits-list');
     list.innerHTML = '';
     state.habits.forEach(h => {
-        const li = document.createElement('li');
-        li.className = 'bg-white/5 border border-white/10 p-3 rounded flex flex-wrap justify-between items-center gap-2';
-        let scaleHTML = '';
-        if (h.hasScale) {
-            const pct = Math.min(100, Math.floor((h.scaleCurrent / h.scaleTarget) * 100));
-            scaleHTML = `
-                <div class="w-full mt-1">
-                    <div class="flex justify-between text-[10px] text-gray-400">
-                        <span>${h.scaleCurrent}/${h.scaleTarget}</span>
-                        <span>${pct}%</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-black/60 rounded overflow-hidden border border-white/5">
-                        <div class="bg-[var(--neon-color)] h-full bar-inner" style="width:${pct}%;"></div>
-                    </div>
-                </div>
-            `;
-        }
-        const rewardText = h.rewardType === 'per_step' ? `+${h.goldPerStep} за шаг` : `+${h.goldBonus} за цель`;
-        const streakText = h.streak > 0 ? `<span class="bg-orange-500 text-black px-1.5 py-0.5 rounded text-[9px] font-bold">🔥${h.streak}</span>` : '';
-        li.innerHTML = `
-            <div class="flex-1 min-w-[120px]">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-sm text-white">${h.name}</span> ${streakText}
-                </div>
-                <div class="text-[10px] text-gray-400">${rewardText} +10 XP +1 ${h.stat}</div>
-                ${scaleHTML}
+        const today = todayStr();
+        const dayData = getDayData(new Date());
+        const done = dayData.habits && dayData.habits.some(x => x.id === h.id);
+        const div = document.createElement('div');
+        div.className = 'bg-white/5 border border-white/10 p-3 rounded flex justify-between items-center';
+        div.innerHTML = `
+            <div>
+                <div class="text-sm text-white">${h.name}</div>
+                <div class="text-[10px] text-gray-400">+${h.gold} GOLD · +1 ${h.stat} · ${h.type === 'daily' ? 'ежедневная' : 'со шкалой'}</div>
+                ${h.type === 'daily' ? `<div class="text-[10px] text-gray-500">Цель: ${h.target} за день</div>` : `<div class="text-[10px] text-gray-500">Прогресс: ${h.current || 0}/${h.target}</div>`}
             </div>
-            <div class="flex gap-1 flex-wrap">
-                ${h.hasScale ? `
-                    <button class="bg-white/10 text-white px-2 py-1 text-xs rounded" onclick="adjustHabitScale(${h.id}, 1)">+1</button>
-                    <button class="bg-white/10 text-white px-2 py-1 text-xs rounded" onclick="adjustHabitScale(${h.id}, -1)">-1</button>
-                ` : `
-                    <button class="bg-[var(--neon-color)] text-black px-3 py-1 text-xs uppercase rounded" onclick="completeHabit(${h.id})">Вып</button>
-                `}
-                <button class="bg-[var(--cyber-pink)] text-white px-2 py-1 text-xs rounded" onclick="failHabit()">Урон</button>
-                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editHabit(${h.id})"><i class="material-icons text-sm">edit</i></button>
-                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('habits', ${h.id})"><i class="material-icons text-sm">delete</i></button>
+            <div>
+                ${done ? `<span class="text-green-400 text-xs">✅ Выполнено</span>` : 
+                `<button class="bg-[var(--neon)] text-black px-3 py-1 text-xs font-bold rounded cyber-btn" onclick="completeHabit(${h.id})">ВЫПОЛНИТЬ</button>`}
+                <button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteHabit(${h.id})"><i class="material-icons text-sm">delete</i></button>
             </div>
         `;
-        list.appendChild(li);
+        list.appendChild(div);
     });
+    if (!state.habits.length) {
+        list.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Нет привычек. Создайте первую!</div>';
+    }
 }
 
 function addHabit() {
-    const name = document.getElementById('habit-name').value.trim();
-    if (!name) return;
-    const stat = document.getElementById('habit-stat').value;
-    const hasScale = document.getElementById('habit-has-scale').checked;
-    const target = parseInt(document.getElementById('habit-scale-target').value) || 10;
-    const rewardType = document.getElementById('habit-reward-type').value;
-    const goldPerStep = parseInt(document.getElementById('habit-gold-per-step').value) || 1;
-    const goldBonus = parseInt(document.getElementById('habit-gold-bonus').value) || 5;
-    state.habits.push({ id: Date.now(), name, stat, hasScale, scaleCurrent: 0, scaleTarget: hasScale ? target : 0, rewardType, goldPerStep, goldBonus, streak: 0, lastDate: null });
-    document.getElementById('habit-name').value = '';
-    document.getElementById('habit-has-scale').checked = false;
-    document.getElementById('habit-scale-target').classList.add('hidden');
-    document.getElementById('habit-gold-per-step').classList.remove('hidden-field');
-    document.getElementById('habit-gold-bonus').classList.add('hidden-field');
+    const name = document.getElementById('habit-name-input').value.trim();
+    if (!name) { triggerAlert('Введите название'); return; }
+    const stat = document.getElementById('habit-stat-input').value;
+    const type = document.getElementById('habit-type-input').value;
+    const target = parseInt(document.getElementById('habit-target-input').value) || 1;
+    const gold = parseInt(document.getElementById('habit-gold-input').value) || 2;
+    state.habits.push({ id: Date.now(), name, stat, type, target, gold, current: 0 });
     saveState();
     renderHabits();
-    triggerAlert("Привычка добавлена");
-}
-
-function editHabit(id) {
-    const h = state.habits.find(x => x.id === id);
-    if (!h) return;
-    const newName = prompt("Новое название:", h.name);
-    if (newName !== null && newName.trim()) { h.name = newName.trim(); saveState(); renderHabits(); triggerAlert("Обновлено"); }
-}
-
-function updateStreak(habit) {
-    const today = new Date().toDateString();
-    if (habit.lastDate === today) return;
-    if (habit.lastDate === null) habit.streak = 1;
-    else {
-        const last = new Date(habit.lastDate);
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (last.toDateString() === yesterday.toDateString()) habit.streak += 1;
-        else if (last.toDateString() !== today) habit.streak = 0;
-    }
-    habit.lastDate = today;
-}
-
-function adjustHabitScale(id, amount) {
-    const h = state.habits.find(x => x.id === id);
-    if (!h) return;
-    h.scaleCurrent = Math.max(0, h.scaleCurrent + amount);
-    if (h.rewardType === 'per_step' && amount > 0) {
-        const reward = h.goldPerStep * amount;
-        state.gold += reward;
-        logGoldTransaction(`Привычка "${h.name}" (шаг)`, reward, 'gain');
-        addDailyLog('✅', `Привычка "${h.name}" +${reward} золота`);
-        updateStreak(h);
-        triggerAlert(`+${reward} GOLD`);
-    }
-    if (h.scaleCurrent >= h.scaleTarget) {
-        h.scaleCurrent = 0;
-        if (h.rewardType === 'per_target') {
-            state.gold += h.goldBonus;
-            logGoldTransaction(`Бонус за привычку "${h.name}"`, h.goldBonus, 'gain');
-            addDailyLog('🎯', `Цель "${h.name}" достигнута! +${h.goldBonus} золота`);
-            triggerAlert(`+${h.goldBonus} GOLD БОНУС`);
-        }
-        completeHabitAwards(h.stat, h.name);
-        updateStreak(h);
-    }
-    saveState();
-    renderStats();
-    renderHabits();
+    closeModal('habit-modal');
+    document.getElementById('habit-name-input').value = '';
+    triggerAlert(`Привычка "${name}" создана!`);
 }
 
 function completeHabit(id) {
     const h = state.habits.find(x => x.id === id);
     if (!h) return;
-    if (h.rewardType === 'per_step' && !h.hasScale) {
-        state.gold += h.goldPerStep;
-        logGoldTransaction(`Привычка "${h.name}"`, h.goldPerStep, 'gain');
-        addDailyLog('✅', `Привычка "${h.name}" +${h.goldPerStep} золота`);
+    const today = todayStr();
+    const dayData = state.dayLogs[today] || { mood: null, diary: [], habits: [], sports: [], finance: [] };
+    // Проверяем, не выполняли ли уже сегодня
+    if (dayData.habits && dayData.habits.some(x => x.id === id)) {
+        triggerAlert('Уже выполнено сегодня!');
+        return;
     }
-    completeHabitAwards(h.stat, h.name);
-    updateStreak(h);
+    // Награда
+    state.gold += h.gold;
+    state.xp += 10;
+    if (h.stat === 'INT') state.int += 1;
+    if (h.stat === 'STR') state.str += 1;
+    // Проверка уровня
+    while (state.xp >= 100) {
+        state.xp -= 100;
+        state.lvl += 1;
+        state.gold += 50;
+        triggerAlert(`УРОВЕНЬ ${state.lvl} ДОСТИГНУТ!`);
+    }
+    // Сохраняем в день
+    if (!dayData.habits) dayData.habits = [];
+    dayData.habits.push({ id: h.id, name: h.name, gold: h.gold });
+    state.dayLogs[today] = dayData;
+    // Для шкалы
+    if (h.type === 'scale') {
+        h.current = (h.current || 0) + 1;
+        if (h.current >= h.target) {
+            h.current = 0;
+            triggerAlert(`Цель "${h.name}" достигнута! Бонус +10 GOLD`);
+            state.gold += 10;
+        }
+    }
     saveState();
     renderStats();
     renderHabits();
+    renderCalendar();
+    triggerAlert(`+${h.gold} GOLD, +10 XP!`);
 }
 
-function completeHabitAwards(stat, name) {
-    if (stat === 'INT') state.int += 1;
-    if (stat === 'STR') state.str += 1;
-    addXP(10);
-    addDailyLog('⭐', `Привычка "${name}" выполнена! +10 XP`);
-    triggerAlert("+10 XP");
-}
-
-function failHabit() {
-    state.hp = Math.max(0, state.hp - 10);
-    if (state.hp === 0) { state.hp = 30; triggerAlert("HP восстановлен до 30"); }
-    addDailyLog('💔', 'Пропущена привычка -10 HP');
-    saveState();
-    renderStats();
-    triggerAlert("-10 HP");
-}
-
-// ====== МИССИИ ======
-function renderTodos() {
-    const list = document.getElementById('todo-list');
-    list.innerHTML = '';
-    state.todos.forEach(t => {
-        const li = document.createElement('li');
-        li.className = 'bg-white/5 border border-white/10 p-2 rounded flex justify-between items-center';
-        li.innerHTML = `
-            <div>
-                <span class="text-sm text-white">${t.name}</span>
-                <div class="text-[10px] text-gray-400">+30 XP +${t.gold} GOLD +2 ${t.stat}</div>
-            </div>
-            <div class="flex gap-1">
-                <button class="bg-[var(--neon-color)] text-black px-2 py-1 text-xs uppercase rounded" onclick="completeTodo(${t.id})">Вып</button>
-                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editTodo(${t.id})"><i class="material-icons text-sm">edit</i></button>
-                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('todos', ${t.id})"><i class="material-icons text-sm">delete</i></button>
-            </div>
-        `;
-        list.appendChild(li);
-    });
-}
-
-function addTodo() {
-    const name = document.getElementById('todo-name').value.trim();
-    if (!name) return;
-    const stat = document.getElementById('todo-stat').value;
-    const gold = parseInt(document.getElementById('todo-gold').value) || 25;
-    state.todos.push({ id: Date.now(), name, stat, gold });
-    document.getElementById('todo-name').value = '';
-    saveState();
-    renderTodos();
-    triggerAlert("Миссия добавлена");
-}
-
-function editTodo(id) {
-    const t = state.todos.find(x => x.id === id);
-    if (!t) return;
-    const newName = prompt("Новое название:", t.name);
-    if (newName !== null && newName.trim()) { t.name = newName.trim(); }
-    const newGold = prompt("Золото:", t.gold);
-    if (newGold !== null && !isNaN(parseInt(newGold))) t.gold = parseInt(newGold);
-    saveState();
-    renderTodos();
-    triggerAlert("Обновлено");
-}
-
-function completeTodo(id) {
-    const idx = state.todos.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    const t = state.todos[idx];
-    if (t.stat === 'INT') state.int += 2;
-    if (t.stat === 'STR') state.str += 2;
-    state.gold += t.gold;
-    logGoldTransaction(`Миссия: "${t.name}"`, t.gold, 'gain');
-    addDailyLog('🏆', `Миссия "${t.name}" выполнена! +${t.gold} золота`);
-    state.todos.splice(idx, 1);
-    addXP(30);
-    saveState();
-    renderStats();
-    renderTodos();
-    triggerAlert("Миссия выполнена!");
+function deleteHabit(id) {
+    if (confirm('Удалить привычку?')) {
+        state.habits = state.habits.filter(x => x.id !== id);
+        saveState();
+        renderHabits();
+        triggerAlert('Привычка удалена');
+    }
 }
 
 // ====== СПОРТ ======
-function toggleSportRewardFields() {
-    const type = document.getElementById('sport-reward-type').value;
-    document.getElementById('sport-gold-per-step').classList.toggle('hidden-field', type === 'per_target');
-    document.getElementById('sport-gold-bonus').classList.toggle('hidden-field', type === 'per_step');
-}
-
-function renderSportMissions() {
+function renderSports() {
     const list = document.getElementById('sport-list');
     list.innerHTML = '';
-    if (!state.sportMissions.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-4">Нет тренировок</div>'; return; }
-    state.sportMissions.forEach(m => {
-        const pct = Math.min(100, Math.floor((m.current / m.target) * 100));
-        const rewardText = m.rewardType === 'per_step' ? `+${m.goldPerStep} за шаг` : `+${m.goldBonus} за цель`;
-        const li = document.createElement('li');
-        li.className = 'bg-white/5 border border-white/10 p-3 rounded flex flex-col gap-2';
-        li.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div>
-                    <span class="text-sm text-white uppercase">${m.name}</span>
-                    <div class="text-[10px] text-[var(--cyber-green)]">${rewardText} +15 XP</div>
-                </div>
-                <div class="flex gap-1">
-                    <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editSport(${m.id})"><i class="material-icons text-sm">edit</i></button>
-                    <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('sportMissions', ${m.id})"><i class="material-icons text-sm">delete</i></button>
-                </div>
+    state.sports.forEach(s => {
+        const today = todayStr();
+        const dayData = state.dayLogs[today] || { mood: null, diary: [], habits: [], sports: [], finance: [] };
+        const done = dayData.sports && dayData.sports.some(x => x.id === s.id);
+        const div = document.createElement('div');
+        div.className = 'bg-white/5 border border-white/10 p-3 rounded flex justify-between items-center';
+        const progText = s.progression === 'manual' ? 'ручной' : `+${s.step || 1} за день`;
+        div.innerHTML = `
+            <div>
+                <div class="text-sm text-white">${s.name}</div>
+                <div class="text-[10px] text-gray-400">Цель: ${s.target} ${s.unit} · +${s.gold} GOLD · ${progText}</div>
+                <div class="text-[10px] text-gray-500">Прогресс: ${s.current || 0}/${s.target}</div>
             </div>
             <div>
-                <div class="flex justify-between text-xs text-gray-400">
-                    <span>${m.current} / ${m.target} ${m.unit}</span>
-                    <span class="neon-text">${pct}%</span>
-                </div>
-                <div class="w-full h-2 bg-black/60 rounded overflow-hidden border border-white/5">
-                    <div class="bg-[var(--neon-color)] h-full bar-inner" style="width:${pct}%;"></div>
-                </div>
-            </div>
-            <div class="flex gap-1 justify-end">
-                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, -5)">-5</button>
-                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, -1)">-1</button>
-                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, 1)">+1</button>
-                <button class="bg-white/10 hover:bg-[var(--neon-color)] hover:text-black px-2 py-0.5 text-xs rounded" onclick="adjustSport(${m.id}, 5)">+5</button>
+                ${done ? `<span class="text-green-400 text-xs">✅ Выполнено</span>` : 
+                `<button class="bg-[var(--neon)] text-black px-3 py-1 text-xs font-bold rounded cyber-btn" onclick="completeSport(${s.id})">ВЫПОЛНИТЬ</button>`}
+                <button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteSport(${s.id})"><i class="material-icons text-sm">delete</i></button>
             </div>
         `;
-        list.appendChild(li);
+        list.appendChild(div);
     });
-}
-
-function addSportMission() {
-    const name = document.getElementById('sport-name').value.trim();
-    const target = parseInt(document.getElementById('sport-target').value);
-    const unit = document.getElementById('sport-unit').value.trim() || "раз";
-    const rewardType = document.getElementById('sport-reward-type').value;
-    const goldPerStep = parseInt(document.getElementById('sport-gold-per-step').value) || 2;
-    const goldBonus = parseInt(document.getElementById('sport-gold-bonus').value) || 10;
-    if (!name || !target || target <= 0) { triggerAlert("Ошибка"); return; }
-    state.sportMissions.push({ id: Date.now(), name, target, current: 0, unit, rewardType, goldPerStep, goldBonus });
-    document.getElementById('sport-name').value = '';
-    document.getElementById('sport-target').value = '';
-    document.getElementById('sport-unit').value = '';
-    document.getElementById('sport-gold-per-step').classList.remove('hidden-field');
-    document.getElementById('sport-gold-bonus').classList.add('hidden-field');
-    saveState();
-    renderSportMissions();
-    triggerAlert("Тренировка добавлена");
-}
-
-function editSport(id) {
-    const m = state.sportMissions.find(x => x.id === id);
-    if (!m) return;
-    const newName = prompt("Новое название:", m.name);
-    if (newName !== null && newName.trim()) m.name = newName.trim();
-    const newTarget = prompt("Новая цель:", m.target);
-    if (newTarget !== null && !isNaN(parseInt(newTarget)) && parseInt(newTarget) > 0) m.target = parseInt(newTarget);
-    saveState();
-    renderSportMissions();
-    triggerAlert("Обновлено");
-}
-
-function adjustSport(id, amount) {
-    const m = state.sportMissions.find(x => x.id === id);
-    if (!m) return;
-    m.current = Math.max(0, m.current + amount);
-    if (m.rewardType === 'per_step' && amount > 0) {
-        const reward = m.goldPerStep * amount;
-        state.gold += reward;
-        logGoldTransaction(`Спорт "${m.name}" (шаг)`, reward, 'gain');
-        addDailyLog('💪', `Спорт "${m.name}" +${reward} золота`);
-        triggerAlert(`+${reward} GOLD`);
+    if (!state.sports.length) {
+        list.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Нет тренировок. Создайте первую!</div>';
     }
-    if (m.current >= m.target) {
-        m.current = 0;
-        if (m.rewardType === 'per_target') {
-            state.gold += m.goldBonus;
-            logGoldTransaction(`Бонус за спорт "${m.name}"`, m.goldBonus, 'gain');
-            addDailyLog('🏅', `Тренировка "${m.name}" завершена! +${m.goldBonus} золота`);
-            triggerAlert(`+${m.goldBonus} GOLD БОНУС`);
+}
+
+function addSport() {
+    const name = document.getElementById('sport-name-input').value.trim();
+    if (!name) { triggerAlert('Введите название'); return; }
+    const progression = document.getElementById('sport-progression-input').value;
+    const step = parseInt(document.getElementById('sport-step-input').value) || 1;
+    const target = parseInt(document.getElementById('sport-target-input').value) || 10;
+    const unit = document.getElementById('sport-unit-input').value.trim() || 'раз';
+    const gold = parseInt(document.getElementById('sport-gold-input').value) || 5;
+    state.sports.push({ 
+        id: Date.now(), name, progression, step, target, unit, gold, 
+        current: 0, lastDate: null 
+    });
+    saveState();
+    renderSports();
+    closeModal('sport-modal');
+    document.getElementById('sport-name-input').value = '';
+    triggerAlert(`Тренировка "${name}" создана!`);
+}
+
+function completeSport(id) {
+    const s = state.sports.find(x => x.id === id);
+    if (!s) return;
+    const today = todayStr();
+    const dayData = state.dayLogs[today] || { mood: null, diary: [], habits: [], sports: [], finance: [] };
+    if (dayData.sports && dayData.sports.some(x => x.id === id)) {
+        triggerAlert('Уже выполнено сегодня!');
+        return;
+    }
+    // Прогрессия
+    if (s.progression !== 'manual') {
+        const step = s.progression === '+X' ? (s.step || 1) : 1;
+        s.current = (s.current || 0) + step;
+        // Проверка достижения цели
+        if (s.current >= s.target) {
+            s.current = 0;
+            state.gold += s.gold;
+            state.xp += 15;
+            state.str += 1;
+            if (!dayData.sports) dayData.sports = [];
+            dayData.sports.push({ id: s.id, name: s.name, gold: s.gold });
+            state.dayLogs[today] = dayData;
+            saveState();
+            renderStats();
+            renderSports();
+            renderCalendar();
+            triggerAlert(`Тренировка "${s.name}" выполнена! +${s.gold} GOLD, +15 XP!`);
+            return;
         }
-        state.str += 1;
-        addXP(15);
-        triggerAlert("Тренировка завершена!");
+        // Если не достигли цели, но прогресс есть
+        triggerAlert(`Прогресс: ${s.current}/${s.target}`);
+        saveState();
+        renderSports();
+        return;
     }
+    // manual — просто даём награду
+    state.gold += s.gold;
+    state.xp += 15;
+    state.str += 1;
+    if (!dayData.sports) dayData.sports = [];
+    dayData.sports.push({ id: s.id, name: s.name, gold: s.gold });
+    state.dayLogs[today] = dayData;
     saveState();
     renderStats();
-    renderSportMissions();
+    renderSports();
+    renderCalendar();
+    triggerAlert(`+${s.gold} GOLD, +15 XP!`);
+}
+
+function deleteSport(id) {
+    if (confirm('Удалить тренировку?')) {
+        state.sports = state.sports.filter(x => x.id !== id);
+        saveState();
+        renderSports();
+        triggerAlert('Тренировка удалена');
+    }
 }
 
 // ====== ФИНАНСЫ ======
-function renderTransactions() {
-    const h = document.getElementById('cash-history');
-    h.innerHTML = '';
-    if (!state.transactions.length) { h.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">Нет транзакций</div>'; return; }
-    state.transactions.forEach(tx => {
-        const isInc = tx.type === 'income';
-        const div = document.createElement('div');
-        div.className = 'bg-black/40 border border-white/5 p-1.5 rounded text-xs flex justify-between items-center';
-        div.innerHTML = `
-            <div>
-                <span class="${isInc ? 'text-[var(--cyber-green)]' : 'text-[var(--cyber-pink)]'} font-bold">${isInc ? '+' : '-'}${tx.amount.toLocaleString()} ₽</span>
-                <span class="text-gray-500 text-[9px] ml-1">${tx.date}</span>
-                <div class="text-gray-300">${tx.desc}</div>
-            </div>
-            <button class="text-gray-600 hover:text-red-400" onclick="deleteTransaction(${tx.id})"><i class="material-icons text-sm">delete</i></button>
-        `;
-        h.appendChild(div);
-    });
-}
-
-function addTransaction(type) {
-    const amt = parseFloat(document.getElementById('cash-amount').value);
-    const desc = document.getElementById('cash-desc').value.trim() || "Не указано";
-    if (isNaN(amt) || amt <= 0) { triggerAlert("Неверная сумма"); return; }
-    if (type === 'income') state.balance += amt;
-    else state.balance -= amt;
-    state.transactions.unshift({ id: Date.now(), type, amount: amt, desc, date: new Date().toLocaleDateString() });
-    addDailyLog(type === 'income' ? '💰' : '💸', `${desc}: ${type === 'income' ? '+' : '-'}${amt} ₽`);
-    document.getElementById('cash-amount').value = '';
-    document.getElementById('cash-desc').value = '';
-    saveState();
-    renderStats();
-    renderTransactions();
-    triggerAlert("Обновлено");
-}
-
-function deleteTransaction(id) {
-    const idx = state.transactions.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    const tx = state.transactions[idx];
-    if (tx.type === 'income') state.balance -= tx.amount;
-    else state.balance += tx.amount;
-    state.transactions.splice(idx, 1);
-    saveState();
-    renderStats();
-    renderTransactions();
-    triggerAlert("Удалено");
-}
-
-// ====== МАГАЗИН ======
-function renderShopItems() {
-    const list = document.getElementById('shop-list');
+function renderFinance() {
+    const list = document.getElementById('finance-list');
     list.innerHTML = '';
-    if (!state.shopItems.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">Магазин пуст</div>'; return; }
-    state.shopItems.forEach(item => {
+    // Показываем за последние 30 дней
+    const all = [];
+    Object.keys(state.dayLogs).forEach(key => {
+        const data = state.dayLogs[key];
+        if (data.finance) {
+            data.finance.forEach(f => {
+                all.push({ ...f, date: key });
+            });
+        }
+    });
+    all.sort((a, b) => b.date.localeCompare(a.date));
+    if (!all.length) {
+        list.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Нет транзакций</div>';
+        return;
+    }
+    all.slice(0, 30).forEach(f => {
         const div = document.createElement('div');
+        const sign = f.type === 'income' ? '+' : '-';
+        const color = f.type === 'income' ? 'text-green-400' : 'text-pink-400';
         div.className = 'bg-black/40 border border-white/5 p-2 rounded text-xs flex justify-between items-center';
         div.innerHTML = `
-            <div>
-                <span class="text-white">${item.name}</span>
-                <span class="text-yellow-400 ml-1">${item.price} GOLD</span>
-            </div>
-            <div class="flex gap-1">
-                <button class="bg-[var(--neon-color)] text-black px-2 py-1 text-[10px] uppercase rounded" onclick="buyShopItem(${item.id})">Купить</button>
-                <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="editShopItem(${item.id})"><i class="material-icons text-sm">edit</i></button>
-                <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteItem('shopItems', ${item.id})"><i class="material-icons text-sm">delete</i></button>
-            </div>
+            <div><span class="${color} font-bold">${sign}${f.amount} ₽</span> <span class="text-gray-500">${f.desc}</span></div>
+            <span class="text-gray-600 text-[9px]">${f.date}</span>
         `;
         list.appendChild(div);
     });
 }
 
-function addShopItem() {
-    const name = document.getElementById('shop-item-name').value.trim();
-    const price = parseInt(document.getElementById('shop-item-price').value);
-    if (!name || isNaN(price) || price <= 0) { triggerAlert("Ошибка"); return; }
-    state.shopItems.push({ id: Date.now(), name, price });
-    document.getElementById('shop-item-name').value = '';
-    document.getElementById('shop-item-price').value = '50';
-    saveState();
-    renderShopItems();
-    triggerAlert("Товар добавлен");
-}
-
-function editShopItem(id) {
-    const item = state.shopItems.find(x => x.id === id);
-    if (!item) return;
-    const newName = prompt("Новое название:", item.name);
-    if (newName !== null && newName.trim()) item.name = newName.trim();
-    const newPrice = prompt("Новая цена:", item.price);
-    if (newPrice !== null && !isNaN(parseInt(newPrice)) && parseInt(newPrice) > 0) item.price = parseInt(newPrice);
-    saveState();
-    renderShopItems();
-    triggerAlert("Обновлено");
-}
-
-function buyShopItem(id) {
-    const item = state.shopItems.find(x => x.id === id);
-    if (!item) return;
-    if (state.gold < item.price) { triggerAlert("Не хватает золота"); return; }
-    state.gold -= item.price;
-    logGoldTransaction(`Покупка: "${item.name}"`, item.price, 'spend');
-    state.purchaseHistory.unshift({ id: Date.now(), name: item.name, price: item.price, date: new Date().toLocaleString() });
-    addDailyLog('🛒', `Покупка: "${item.name}" за ${item.price} золота`);
+function addFinance(type) {
+    const amt = parseInt(document.getElementById('finance-amount-input').value);
+    const desc = document.getElementById('finance-desc-input').value.trim() || 'Не указано';
+    const date = document.getElementById('finance-date-input').value || todayStr();
+    if (!amt || amt <= 0) { triggerAlert('Введите сумму'); return; }
+    if (type === 'income') state.balance += amt;
+    else state.balance -= amt;
+    const dayData = getDayData(parseDate(date));
+    if (!dayData.finance) dayData.finance = [];
+    dayData.finance.push({ id: Date.now(), type, amount: amt, desc });
+    state.dayLogs[date] = dayData;
     saveState();
     renderStats();
-    renderShopItems();
-    renderPurchaseHistory();
-    triggerAlert(`Куплено: ${item.name}`);
-}
-
-function renderPurchaseHistory() {
-    const h = document.getElementById('purchase-history');
-    h.innerHTML = '';
-    if (!state.purchaseHistory.length) { h.innerHTML = '<div class="text-gray-500 text-[10px] text-center py-1">Нет покупок</div>'; return; }
-    state.purchaseHistory.slice(0, 15).forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'bg-black/30 border border-white/5 p-1 rounded text-[10px] flex justify-between items-center';
-        div.innerHTML = `<span class="text-gray-300">${p.name}</span><span class="text-yellow-400">-${p.price} GOLD</span>`;
-        h.appendChild(div);
-    });
-}
-
-// ====== ЗОЛОТО ======
-function logGoldTransaction(desc, amount, type) {
-    state.goldTransactions.unshift({ id: Date.now(), desc, amount, type, date: new Date().toLocaleString() });
-    saveState();
-    renderGoldHistory();
-}
-
-function renderGoldHistory() {
-    const h = document.getElementById('gold-history');
-    h.innerHTML = '';
-    if (!state.goldTransactions.length) { h.innerHTML = '<div class="text-gray-500 text-[10px] text-center py-1">Нет записей</div>'; return; }
-    state.goldTransactions.slice(0, 20).forEach(gt => {
-        const isGain = gt.type === 'gain';
-        const div = document.createElement('div');
-        div.className = 'bg-black/30 border border-white/5 p-1 rounded text-[10px] flex justify-between items-center';
-        div.innerHTML = `
-            <span class="${isGain ? 'text-yellow-400' : 'text-gray-400'}">${isGain ? '+' : '-'}${gt.amount} GOLD</span>
-            <span class="text-gray-500 text-[8px]">${gt.desc}</span>
-            <button class="text-gray-600 hover:text-red-400" onclick="deleteGoldTransaction(${gt.id})"><i class="material-icons text-xs">delete</i></button>
-        `;
-        h.appendChild(div);
-    });
-}
-
-function deleteGoldTransaction(id) {
-    const idx = state.goldTransactions.findIndex(g => g.id === id);
-    if (idx === -1) return;
-    const gt = state.goldTransactions[idx];
-    if (gt.type === 'gain') state.gold = Math.max(0, state.gold - gt.amount);
-    else state.gold += gt.amount;
-    state.goldTransactions.splice(idx, 1);
-    saveState();
-    renderStats();
-    renderGoldHistory();
-    triggerAlert("Удалено");
+    renderFinance();
+    renderCalendar();
+    closeModal('finance-modal');
+    document.getElementById('finance-amount-input').value = '';
+    document.getElementById('finance-desc-input').value = '';
+    triggerAlert(`Транзакция добавлена`);
 }
 
 // ====== ДНЕВНИК ======
-function selectMood(mood, btn) {
-    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
-    btn.classList.add('active-mood');
-    state.selectedMood = mood;
-}
-
-function renderDiary() {
-    const list = document.getElementById('diary-list');
-    list.innerHTML = '';
-    if (!state.diaryEntries.length) { list.innerHTML = '<div class="text-gray-500 text-xs text-center py-4">Нет записей</div>'; return; }
-    state.diaryEntries.forEach(e => {
-        const moodColor = e.mood === 'Отличное' ? '#00c853' :
-                          e.mood === 'Стабильное' ? '#ffd600' :
-                          e.mood === 'Спокойное' ? '#2979ff' :
-                          e.mood === 'Усталость' ? '#ff6d00' :
-                          e.mood === 'Выгорание' ? '#d50000' : '#888';
-        const div = document.createElement('div');
-        div.className = 'bg-white/5 border border-white/10 p-2 rounded';
-        div.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div>
-                    <span class="text-[9px] text-gray-500">${e.dateTime}</span>
-                    <div class="text-xs font-bold flex items-center gap-1">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${moodColor};"></span>
-                        ${e.mood || 'Нет'}
-                    </div>
-                </div>
-                <div class="flex gap-1">
-                    <button class="text-gray-500 hover:text-yellow-400 p-1" onclick="startEditDiaryEntry(${e.id})"><i class="material-icons text-sm">edit</i></button>
-                    <button class="text-gray-500 hover:text-red-400 p-1" onclick="deleteDiaryEntry(${e.id})"><i class="material-icons text-sm">delete</i></button>
-                </div>
-            </div>
-            <p class="text-xs text-gray-300 mt-1 whitespace-pre-wrap">${e.text}</p>
-        `;
-        list.appendChild(div);
-    });
-}
-
-function saveDiaryEntry() {
-    const text = document.getElementById('diary-entry-text').value.trim();
-    if (!text) { triggerAlert("Пусто"); return; }
-    if (editingDiaryId !== null) {
-        const entry = state.diaryEntries.find(e => e.id === editingDiaryId);
-        if (entry) {
-            entry.text = text;
-            entry.mood = state.selectedMood || 'Не указано';
-            entry.dateTime = `Ред: ${new Date().toLocaleString()}`;
-        }
-        editingDiaryId = null;
-        document.getElementById('diary-save-btn').innerText = "СОХРАНИТЬ";
-        document.getElementById('diary-cancel-btn').classList.add('hidden');
-        document.getElementById('diary-mode-indicator').classList.add('hidden');
-        triggerAlert("Обновлено");
-    } else {
-        state.diaryEntries.unshift({
-            id: Date.now(),
-            text,
-            mood: state.selectedMood || 'Не указано',
-            dateTime: new Date().toLocaleString()
-        });
-        addDailyLog('📝', 'Новая запись в дневнике');
-        triggerAlert("Сохранено");
-    }
-    document.getElementById('diary-entry-text').value = '';
-    state.selectedMood = '';
-    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
+function addDiaryEntry() {
+    const date = document.getElementById('diary-date-input').value || todayStr();
+    const mood = document.getElementById('diary-mood-input').value;
+    const text = document.getElementById('diary-text-input').value.trim();
+    if (!text) { triggerAlert('Введите текст записи'); return; }
+    const dayData = getDayData(parseDate(date));
+    dayData.mood = mood;
+    if (!dayData.diary) dayData.diary = [];
+    dayData.diary.push({ id: Date.now(), text, mood });
+    state.dayLogs[date] = dayData;
     saveState();
-    renderDiary();
+    renderCalendar();
+    closeModal('diary-modal');
+    document.getElementById('diary-text-input').value = '';
+    triggerAlert('Запись сохранена!');
 }
 
-function startEditDiaryEntry(id) {
-    const entry = state.diaryEntries.find(e => e.id === id);
-    if (!entry) return;
-    editingDiaryId = id;
-    document.getElementById('diary-entry-text').value = entry.text;
-    state.selectedMood = entry.mood;
-    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
-    const moodMap = { 'Отличное':'mood-green', 'Стабильное':'mood-yellow', 'Спокойное':'mood-blue', 'Усталость':'mood-orange', 'Выгорание':'mood-red' };
-    // У нас нет id для кнопок, просто пройдёмся по ним
-    document.querySelectorAll('.mood-btn').forEach(btn => {
-        if (btn.innerText.trim() === entry.mood) btn.classList.add('active-mood');
-    });
-    document.getElementById('diary-save-btn').innerText = "ОБНОВИТЬ";
-    document.getElementById('diary-cancel-btn').classList.remove('hidden');
-    document.getElementById('diary-mode-indicator').classList.remove('hidden');
-}
-
-function cancelDiaryEdit() {
-    editingDiaryId = null;
-    document.getElementById('diary-entry-text').value = '';
-    state.selectedMood = '';
-    document.querySelectorAll('.mood-btn').forEach(el => el.classList.remove('active-mood'));
-    document.getElementById('diary-save-btn').innerText = "СОХРАНИТЬ";
-    document.getElementById('diary-cancel-btn').classList.add('hidden');
-    document.getElementById('diary-mode-indicator').classList.add('hidden');
-}
-
-function deleteDiaryEntry(id) {
-    state.diaryEntries = state.diaryEntries.filter(e => e.id !== id);
-    saveState();
-    renderDiary();
-    triggerAlert("Удалено");
-}
-
-// ====== ОБЩЕЕ УДАЛЕНИЕ ======
-function deleteItem(arrName, id) {
-    state[arrName] = state[arrName].filter(x => x.id !== id);
-    saveState();
-    if (arrName === 'habits') renderHabits();
-    if (arrName === 'todos') renderTodos();
-    if (arrName === 'sportMissions') renderSportMissions();
-    if (arrName === 'shopItems') renderShopItems();
-    triggerAlert("Удалено");
+// ====== СТАТЫ ======
+function renderStats() {
+    document.getElementById('char-lvl').textContent = state.lvl;
+    document.getElementById('char-gold').textContent = state.gold;
+    document.getElementById('stat-int').textContent = state.int;
+    document.getElementById('stat-str').textContent = state.str;
+    document.getElementById('stat-hp').textContent = state.hp;
+    document.getElementById('stat-balance').textContent = state.balance + '₽';
+    document.getElementById('xp-text').textContent = `${state.xp}/100`;
+    document.getElementById('xp-bar').style.width = `${Math.min(100, state.xp)}%`;
 }
 
 // ====== СБРОС ======
 function resetSystem() {
-    if (confirm("Удалить все данные?")) {
-        localStorage.removeItem('cyberRPG_ios');
-        state = defaultState;
-        saveState();
+    if (confirm('Удалить ВСЕ данные?')) {
+        localStorage.removeItem('cyberRPG_v2');
         location.reload();
     }
 }
 
 // ====== ИНИЦИАЛИЗАЦИЯ ======
-window.onload = function() {
+function init() {
     changeTheme(state.activeTheme);
     renderStats();
     renderHabits();
-    renderTodos();
-    renderSportMissions();
-    renderTransactions();
-    renderShopItems();
-    renderPurchaseHistory();
-    renderGoldHistory();
-    renderDiary();
-    updateDailySummary();
-    toggleHabitRewardFields();
-    toggleSportRewardFields();
-    triggerAlert("CyberRPG iOS готов");
-};
+    renderSports();
+    renderFinance();
+    renderCalendar();
+    // Устанавливаем сегодняшнюю дату в модалках
+    document.getElementById('diary-date-input').value = todayStr();
+    document.getElementById('finance-date-input').value = todayStr();
+    triggerAlert('CyberRPG v2.0 загружен');
+}
+
+window.onload = init;
+
+// ====== ДОПОЛНИТЕЛЬНО: Очистка устаревших данных в 00:00 ======
+// Простая проверка при загрузке
+(function cleanup() {
+    const today = todayStr();
+    // Обновляем ежедневные привычки — сбрасываем отметки
+    // (данные уже хранятся по дням, так что ничего не делаем)
+    console.log('CyberRPG готов к новому дню');
+})();
 </script>
 </body>
 </html>
