@@ -108,7 +108,7 @@
             </div>
             <div>
                 <div class="text-lg font-bold tracking-widest" style="font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: var(--neon-glow);">CYBER_RPG</div>
-                <div class="text-[10px] text-gray-500">v23.0 · финал</div>
+                <div class="text-[10px] text-gray-500">v23.1 · финал</div>
             </div>
         </div>
         <div class="flex gap-3 text-xs">
@@ -297,7 +297,7 @@
             <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-4" style="font-family:'Orbitron',sans-serif;">❓ ПОМОЩЬ</h2>
             <div class="help-card"><h3>💪 Здоровье (HP)</h3><p>HP влияет на возможность получать золото и XP. Если HP достигает 0, вы не можете зарабатывать награды. Восстанавливайте HP, выполняя обязательные привычки и тренировки. За пропуск обязательных задач HP уменьшается.</p></div>
             <div class="help-card"><h3>⚡ Штрафы</h3><p>Добровольный штраф — случайное наказание из трёх вариантов: потеря 80% золота, блокировка магазина на 3 дня, потеря 75 HP. Используйте осознанно.</p></div>
-            <div class="help-card"><h3>📈 Прогрессия в спорте</h3><p>При включении прогрессии каждый день цель увеличивается на шаг. Сегодняшняя цель может быть 50, завтра 55 и т.д. После выполнения цели она засчитывается, и можно выполнять её снова в тот же день — это «дополнительные подходы».</p></div>
+            <div class="help-card"><h3>📈 Прогрессия в спорте</h3><p>При включении прогрессии цель увеличивается на шаг через заданный интервал дней, пока не достигнет лимита. Это позволяет автоматически усложнять тренировки.</p></div>
             <div class="help-card"><h3>🔥 Серии</h3><p>Серия (🔥) появляется, когда вы выполняете привычку несколько дней подряд. Чем длиннее серия, тем выше мотивация. Серия отображается в списке привычек и в сводке дня.</p></div>
             <div class="help-card"><h3>📊 Оценка дня</h3><p>Оценка дня (0–100) вычисляется на основе настроения, выполненных привычек, тренировок, планов, работы, финансов и покупок. Чем выше оценка, тем лучше.</p></div>
             <div class="help-card"><h3>🛒 Магазин</h3><p>Тратьте золото на покупки. Если золота недостаточно, кнопка «Купить» заменяется на «Штраф». Магазин блокируется при HP < 20.</p></div>
@@ -348,7 +348,11 @@
         <div class="modal-content"><button class="modal-close" onclick="closeModal('habit-modal')">✕</button><h2>НОВАЯ ПРИВЫЧКА</h2><div class="space-y-3"><input id="habit-name-input" placeholder="Название"><select id="habit-stat-input"><option value="INT">INT</option><option value="STR">STR</option></select><select id="habit-type-input"><option value="daily">Ежедневная</option><option value="longterm">Долгосрочная</option></select><div><select id="habit-reset-interval-type"><option value="1">Каждый день</option><option value="custom">Каждые X дней</option></select><input id="habit-reset-custom" type="number" placeholder="X дней" class="hidden-field" min="1"></div><input id="habit-target-input" type="number" placeholder="Цель" min="1"><div><select id="habit-reward-type-input" onchange="updateHabitRewardFields()"><option value="per_step">За шаг</option><option value="per_target">За цель</option><option value="mixed">Смешанная</option></select></div><div id="habit-gold-fields"><input id="habit-gold-per-step-input" type="number" placeholder="Золото за шаг" min="0"><input id="habit-gold-bonus-input" type="number" placeholder="Бонус за цель" class="hidden-field" min="0"></div><div><div class="flex items-center gap-2"><input type="checkbox" id="habit-mandatory-input" onchange="toggleHpFields('habit')"><label class="text-xs text-gray-400">Обязательная (HP)</label></div><div id="habit-hp-fields" class="sub-field hidden-field"><input id="habit-hp-loss-input" type="number" placeholder="Потеря HP при пропуске" min="0"><input id="habit-hp-gain-input" type="number" placeholder="Восстановление HP при выполнении" min="0"></div></div><button class="btn-primary" onclick="addHabit()">СОЗДАТЬ</button></div></div>
     </div>
     <div id="sport-modal" class="modal">
-        <div class="modal-content"><button class="modal-close" onclick="closeModal('sport-modal')">✕</button><h2>НОВАЯ ТРЕНИРОВКА</h2><div class="space-y-3"><input id="sport-name-input" placeholder="Название"><select id="sport-type-input"><option value="daily">Ежедневная</option></select><div><select id="sport-reset-interval-type"><option value="1">Каждый день</option><option value="custom">Каждые X дней</option></select><input id="sport-reset-custom" type="number" placeholder="X дней" class="hidden-field" min="1"></div><input id="sport-target-input" type="number" placeholder="Цель" min="1"><div><label class="flex items-center gap-2 text-xs text-gray-400"><input type="checkbox" id="sport-progression-toggle" onchange="toggleSportProgression()"> Прогрессия (+шаг каждый день)</label><input id="sport-step-input" type="number" placeholder="Шаг прогрессии" class="hidden-field" min="1"></div><div><select id="sport-reward-type-input" onchange="updateSportRewardFields()"><option value="per_step">За шаг</option><option value="per_target">За цель</option><option value="mixed">Смешанная</option></select></div><div id="sport-gold-fields"><input id="sport-gold-per-step-input" type="number" placeholder="Золото за шаг" min="0"><input id="sport-gold-bonus-input" type="number" placeholder="Бонус за цель" class="hidden-field" min="0"></div><input id="sport-unit-input" placeholder="Единица (раз, км, мин)"><div><div class="flex items-center gap-2"><input type="checkbox" id="sport-mandatory-input" onchange="toggleHpFields('sport')"><label class="text-xs text-gray-400">Обязательная (HP)</label></div><div id="sport-hp-fields" class="sub-field hidden-field"><input id="sport-hp-loss-input" type="number" placeholder="Потеря HP при пропуске" min="0"><input id="sport-hp-gain-input" type="number" placeholder="Восстановление HP при выполнении" min="0"></div></div><button class="btn-primary" onclick="addSport()">СОЗДАТЬ</button></div></div>
+        <div class="modal-content"><button class="modal-close" onclick="closeModal('sport-modal')">✕</button><h2>НОВАЯ ТРЕНИРОВКА</h2><div class="space-y-3"><input id="sport-name-input" placeholder="Название"><select id="sport-type-input"><option value="daily">Ежедневная</option></select><div><select id="sport-reset-interval-type"><option value="1">Каждый день</option><option value="custom">Каждые X дней</option></select><input id="sport-reset-custom" type="number" placeholder="X дней" class="hidden-field" min="1"></div><input id="sport-target-input" type="number" placeholder="Цель" min="1"><div><label class="flex items-center gap-2 text-xs text-gray-400"><input type="checkbox" id="sport-progression-toggle" onchange="toggleSportProgression()"> Прогрессия</label><div id="sport-progression-fields" class="sub-field hidden-field">
+                <input id="sport-step-input" type="number" placeholder="Шаг" min="1" class="mb-1">
+                <input id="sport-progression-interval" type="number" placeholder="Интервал (дней)" min="1" class="mb-1">
+                <input id="sport-progression-limit" type="number" placeholder="Лимит цели (0 = без лимита)" min="0">
+            </div></div><div><select id="sport-reward-type-input" onchange="updateSportRewardFields()"><option value="per_step">За шаг</option><option value="per_target">За цель</option><option value="mixed">Смешанная</option></select></div><div id="sport-gold-fields"><input id="sport-gold-per-step-input" type="number" placeholder="Золото за шаг" min="0"><input id="sport-gold-bonus-input" type="number" placeholder="Бонус за цель" class="hidden-field" min="0"></div><input id="sport-unit-input" placeholder="Единица (раз, км, мин)"><div><div class="flex items-center gap-2"><input type="checkbox" id="sport-mandatory-input" onchange="toggleHpFields('sport')"><label class="text-xs text-gray-400">Обязательная (HP)</label></div><div id="sport-hp-fields" class="sub-field hidden-field"><input id="sport-hp-loss-input" type="number" placeholder="Потеря HP при пропуске" min="0"><input id="sport-hp-gain-input" type="number" placeholder="Восстановление HP при выполнении" min="0"></div></div><button class="btn-primary" onclick="addSport()">СОЗДАТЬ</button></div></div>
     </div>
     <div id="plan-modal" class="modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('plan-modal')">✕</button><h2>НОВЫЙ ПЛАН</h2><div class="space-y-3"><input id="plan-name-input" placeholder="Название"><input id="plan-deadline-input" type="date"><div><div class="flex items-center gap-2"><input type="checkbox" id="plan-urgent-input" onchange="toggleUrgentFields()"><label class="text-xs text-gray-400">Срочность (+бонус %)</label></div><div id="plan-urgent-fields" class="sub-field hidden-field"><div class="flex gap-2 items-center"><input id="plan-bonus-percent-input" type="number" placeholder="Бонус %" value="20" oninput="calculatePlanGold()" min="0"><span class="text-xs text-gray-400">%</span></div></div></div><div><input id="plan-gold-input" type="number" placeholder="Базовое золото" oninput="calculatePlanGold()" min="0"><div id="plan-total-gold-display" class="reward-calc mt-1">Итого: 0 GOLD</div></div><button class="btn-primary" onclick="addPlan()">СОЗДАТЬ</button></div></div></div>
     <div id="work-modal" class="modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('work-modal')">✕</button><h2>ДОБАВИТЬ ПРОЕКТ</h2><div class="space-y-3"><input id="work-name-input" placeholder="Название проекта"><input id="work-gold-per-hour-input" type="number" placeholder="Золото за час" min="0"><button class="btn-primary" onclick="addWork()">ДОБАВИТЬ</button></div></div></div>
@@ -400,7 +404,7 @@
     <div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a18] border border-[var(--neon)] shadow-[var(--neon-glow)] p-3 rounded-xl text-xs font-bold transition-all duration-500 translate-y-[200%] z-50 text-center max-w-xs backdrop-blur-sm">// SYSTEM: ONLINE</div>
 </div>
 <script>
-// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.0) ======
+// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.1) ======
 let state = {
     gold: 0, xp: 0, lvl: 1, int: 10, str: 10, hp: 100, balance: 0,
     activeTheme: '#00f0ff',
@@ -431,11 +435,9 @@ if (saved) {
     try {
         const parsed = JSON.parse(saved);
         Object.assign(state, parsed);
-        // Восстанавливаем дату с защитой от кривых данных
         state.currentDate = new Date(parsed.currentDate || Date.now());
         if (isNaN(state.currentDate)) state.currentDate = new Date();
         state.selectedDate = parsed.selectedDate || new Date().toDateString();
-        // Все остальные проверки (они нужны, чтобы старые сохранения не сломались)
         if (!state.plans) state.plans = [];
         if (!state.work) state.work = [];
         if (!state.purchaseHistory) state.purchaseHistory = [];
@@ -451,62 +453,34 @@ if (saved) {
         if (!state.bodyMetrics.weight) state.bodyMetrics.weight = [];
         if (!state.bodyMetrics.height) state.bodyMetrics.height = [];
         if (state.notes === undefined) state.notes = '';
+        // Инициализация новых полей для старых спортивных упражнений
+        state.sports.forEach(s => {
+            if (s.progression) {
+                if (s.progressionInterval === undefined) s.progressionInterval = 1;
+                if (s.progressionLimit === undefined) s.progressionLimit = 0;
+                if (s.lastProgressionUpdate === undefined) s.lastProgressionUpdate = s.lastReset || todayStr();
+            }
+        });
     } catch(e) { console.warn('Ошибка загрузки'); }
 }
 function saveState() {
     const toSave = { ...state };
-    // Гарантируем, что currentDate — валидный объект Date
     if (state.currentDate instanceof Date && !isNaN(state.currentDate)) {
         toSave.currentDate = state.currentDate.toISOString();
     } else {
-        toSave.currentDate = new Date().toISOString(); // fallback
+        toSave.currentDate = new Date().toISOString();
     }
     toSave.selectedDate = state.selectedDate;
     localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave));
 }
 
-// ====== ЗВУК-ИМИТАЦИЯ ВИБРАЦИИ (для iPhone) ======
-function playSoftTap() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 180;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.06, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.05);
-    } catch(e) {}
-}
-
-document.addEventListener('touchstart', function wakeAudio() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') ctx.resume();
-    } catch(e) {}
-    document.removeEventListener('touchstart', wakeAudio);
-}, { once: true });
-
-// ====== ОБНОВЛЁННЫЙ triggerAlert ======
+// ====== УБРАНЫ ВСЕ ВСПЫШКИ И ВИБРАЦИИ ======
 function triggerAlert(msg, vibro = 10) {
     const box = document.getElementById('alert-box');
     box.innerText = `// ${msg}`;
     box.classList.remove('translate-y-[200%]');
     setTimeout(() => box.classList.add('translate-y-[200%]'), 3000);
-
-    // Визуальная вспышка (приятный отклик)
-    document.body.style.transition = 'background 0.15s';
-    document.body.style.background = 'rgba(0, 240, 255, 0.08)';
-    setTimeout(() => document.body.style.background = '', 200);
-
-    if (navigator.vibrate) {
-        navigator.vibrate(vibro);
-    } else {
-        playSoftTap();
-    }
+    // Никаких вспышек, никаких вибраций
 }
 
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
@@ -523,7 +497,7 @@ function getDayKey(date) { return formatDateInput(date); }
 function getDayData(date) { const key = getDayKey(date); if (!state.dayLogs[key]) { state.dayLogs[key] = { mood: null, diary: [], habits: [], sports: [], plans: [], work: [], finance: [], purchases: [], penalties: [] }; } return state.dayLogs[key]; }
 function getResetInterval(type, custom) { if (type === 'custom') return parseInt(custom) || 1; return parseInt(type); }
 function addXP(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить XP', 20); return; } state.xp += amount; const needed = 100 + (state.lvl - 1) * 10; while (state.xp >= needed) { state.xp -= needed; state.lvl += 1; let goldReward = state.levelBaseGold; if (state.levelProgression) { goldReward = state.levelBaseGold + (state.lvl - 1) * state.levelStep; } state.gold += goldReward; triggerAlert(`УРОВЕНЬ ${state.lvl} ДОСТИГНУТ! +${goldReward} GOLD`, 50); } saveState(); renderStats(); }
-function addGold(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить золото', 20); return; } state.gold += amount; saveState(); renderStats(); renderShop(); if (navigator.vibrate) navigator.vibrate(10); }
+function addGold(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить золото', 20); return; } state.gold += amount; saveState(); renderStats(); renderShop(); }
 function canEarnGold() { if (state.hp <= 0) { triggerAlert('HP = 0! Невозможно получить золото или XP. Восстановите HP!', 30); return false; } return true; }
 function checkShopBlocked() { if (state.hp < 20) { triggerAlert('HP < 20! Магазин заблокирован.', 20); return true; } if (state.shopBlocked && Date.now() < state.shopBlocked) { triggerAlert(`Магазин заблокирован до ${new Date(state.shopBlocked).toLocaleDateString()}`, 20); return true; } else { state.shopBlocked = 0; saveState(); } return false; }
 function renderDayRating() { const today = todayStr(); const data = state.dayLogs[today]; if (!data) { document.getElementById('day-rating').textContent = '—'; return; } let score = 50; const moodMap = { 'Отличное': 100, 'Стабильное': 75, 'Спокойное': 50, 'Усталость': 25, 'Выгорание': 0 }; if (data.mood && moodMap[data.mood] !== undefined) { score = (score + moodMap[data.mood]) / 2; } if (data.habits) score += data.habits.length * 2; if (data.sports) score += data.sports.length * 2; if (data.diary && data.diary.length) score += 3; if (data.plans) score += data.plans.length * 5; if (data.work) { let totalHours = 0; data.work.forEach(w => totalHours += w.hours); score += totalHours * 2; } const financeToday = data.finance || []; let balanceChange = 0; financeToday.forEach(f => { if (f.type === 'income') balanceChange += f.amount; else balanceChange -= f.amount; }); score += Math.floor(balanceChange / 200); const allPrices = state.shopItems.map(item => item.price); const avgPrice = allPrices.length ? allPrices.reduce((a,b) => a+b, 0) / allPrices.length : 1; if (data.purchases) { data.purchases.forEach(p => { const relativePrice = avgPrice > 0 ? p.price / avgPrice : 1; const balanceFactor = p.price / (state.gold + 1); let penalty = Math.floor(relativePrice * 3 + balanceFactor * 2); penalty = Math.max(1, Math.min(15, penalty)); score -= penalty; }); } if (data.penalties) score -= data.penalties.length * 10; score = Math.max(0, Math.min(100, Math.round(score))); const el = document.getElementById('day-rating'); el.textContent = score; if (score >= 80) el.style.color = '#00ffaa'; else if (score >= 50) el.style.color = '#ffd600'; else el.style.color = '#ff0055'; }
@@ -532,6 +506,7 @@ function checkDailyReset() {
     const today = todayStr();
     if (lastDate && lastDate !== today) {
         const todayObj = new Date();
+        // Сброс привычек
         state.habits.forEach(h => {
             if (h.type === 'daily') {
                 const daysSinceReset = (todayObj - new Date(h.lastReset)) / (1000*60*60*24);
@@ -541,10 +516,21 @@ function checkDailyReset() {
                 }
             }
         });
+        // Спорт – прогрессия по интервалу и лимиту
         state.sports.forEach(s => {
-            if (s.progression && s.baseTarget !== undefined) {
-                s.currentTarget = (s.currentTarget || s.baseTarget) + (s.step || 1);
+            if (s.progression) {
+                const lastUpdate = new Date(s.lastProgressionUpdate || s.lastReset || today);
+                const daysSinceUpdate = (todayObj - lastUpdate) / (1000*60*60*24);
+                const interval = s.progressionInterval || 1;
+                if (daysSinceUpdate >= interval) {
+                    const limit = s.progressionLimit || 0;
+                    let newTarget = (s.currentTarget || s.baseTarget || s.target) + (s.step || 1) * Math.floor(daysSinceUpdate / interval);
+                    if (limit > 0 && newTarget > limit) newTarget = limit;
+                    s.currentTarget = newTarget;
+                    s.lastProgressionUpdate = today;
+                }
             }
+            // Сброс current по интервалу (как и раньше)
             const daysSinceReset = (todayObj - new Date(s.lastReset)) / (1000*60*60*24);
             if (daysSinceReset >= s.resetInterval) {
                 s.current = 0;
@@ -868,7 +854,7 @@ function renderSports() {
         let progressText = `Сегодня: ${s.current || 0}/${target}`;
         if (done && (s.current || 0) > target) { const extra = (s.current || 0) - target; progressText += ` (+${extra})`; }
         const mandatoryTag = s.mandatory ? '<span class="tag">⭐ Обязательная</span>' : '';
-        const progTag = s.progression ? `<span class="tag">+${s.step || 1}/день</span>` : '';
+        const progTag = s.progression ? `<span class="tag">+${s.step || 1} / ${s.progressionInterval || 1} дн. (лимит ${s.progressionLimit || '∞'})</span>` : '';
         const streakTag = done ? `<span class="tag" style="background:rgba(255,165,0,0.2);color:#ffa500;">🔥 ${s.streak || 0} дн.</span>` : '';
         let folderSelect = '<select onchange="moveItemToFolder(\'sport\', '+s.id+', this.value)" style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;">';
         folderSelect += `<option value="">Без папки</option>`;
@@ -910,7 +896,6 @@ function addHabit() {
     document.getElementById('habit-hp-fields').classList.add('hidden-field');
     document.getElementById('habit-reset-custom').classList.add('hidden-field');
     triggerAlert(`Привычка "${name}" создана`, 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 function completeHabit(id) {
     const h = state.habits.find(x => x.id === id);
@@ -943,14 +928,12 @@ function completeHabit(id) {
         updateStreak(h);
         triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`, 30);
     }
-    // Внешний вызов updateStreak(h) УДАЛЁН – теперь серия только за полное выполнение
     if (h.stat === 'INT') state.int += 1;
     if (h.stat === 'STR') state.str += 1;
     saveState(); renderStats(); renderHabits(); renderCalendar(); renderDayRating();
     triggerAlert(`+${goldEarned} GOLD, +${10*count} XP`, 15);
-    if (navigator.vibrate) navigator.vibrate(15);
 }
-function deleteHabit(id) { if (confirm('Удалить привычку?')) { state.habits = state.habits.filter(x => x.id !== id); saveState(); renderHabits(); triggerAlert('Удалено', 10); if (navigator.vibrate) navigator.vibrate(10); } }
+function deleteHabit(id) { if (confirm('Удалить привычку?')) { state.habits = state.habits.filter(x => x.id !== id); saveState(); renderHabits(); triggerAlert('Удалено', 10); } }
 function updateStreak(habit) {
     const today = new Date().toDateString();
     if (habit.lastDate === today) return;
@@ -980,13 +963,16 @@ function addSport() {
     const hpGain = mandatory ? Math.max(0, parseInt(document.getElementById('sport-hp-gain-input').value) || 0) : 0;
     const progression = document.getElementById('sport-progression-toggle').checked;
     const step = progression ? Math.max(1, parseInt(document.getElementById('sport-step-input').value) || 1) : 0;
+    const progInterval = progression ? Math.max(1, parseInt(document.getElementById('sport-progression-interval').value) || 1) : 1;
+    const progLimit = progression ? Math.max(0, parseInt(document.getElementById('sport-progression-limit').value) || 0) : 0;
     state.sports.push({
         id: Date.now(), name, resetInterval, target, rewardType,
         goldPerStep, goldBonus, unit, mandatory, hpLoss, hpGain,
-        progression, step,
+        progression, step, progressionInterval: progInterval, progressionLimit: progLimit,
         current: 0, lastReset: todayStr(),
         baseTarget: progression ? target : undefined,
         currentTarget: progression ? target : undefined,
+        lastProgressionUpdate: todayStr(),
         streak: 0, lastDate: null, folderId: null
     });
     saveState(); renderSports(); closeModal('sport-modal');
@@ -998,10 +984,12 @@ function addSport() {
     document.getElementById('sport-mandatory-input').checked = false;
     document.getElementById('sport-progression-toggle').checked = false;
     document.getElementById('sport-step-input').value = '';
+    document.getElementById('sport-progression-interval').value = '';
+    document.getElementById('sport-progression-limit').value = '';
     document.getElementById('sport-reset-custom').classList.add('hidden-field');
     document.getElementById('sport-hp-fields').classList.add('hidden-field');
+    document.getElementById('sport-progression-fields').classList.add('hidden-field');
     triggerAlert(`Тренировка "${name}" создана`, 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 function completeSport(id) {
     const s = state.sports.find(x => x.id === id);
@@ -1037,9 +1025,8 @@ function completeSport(id) {
     state.str += 1;
     saveState(); renderStats(); renderSports(); renderCalendar(); renderDayRating();
     triggerAlert(`+${goldEarned} GOLD, +${15*count} XP`, 15);
-    if (navigator.vibrate) navigator.vibrate(15);
 }
-function deleteSport(id) { if (confirm('Удалить тренировку?')) { state.sports = state.sports.filter(x => x.id !== id); saveState(); renderSports(); triggerAlert('Удалено', 10); if (navigator.vibrate) navigator.vibrate(10); } }
+function deleteSport(id) { if (confirm('Удалить тренировку?')) { state.sports = state.sports.filter(x => x.id !== id); saveState(); renderSports(); triggerAlert('Удалено', 10); } }
 function updateSportStreak(sport) {
     const today = new Date().toDateString();
     if (sport.lastDate === today) return;
@@ -1097,7 +1084,6 @@ function addPlan() {
     document.getElementById('plan-urgent-fields').classList.add('hidden-field');
     document.getElementById('plan-total-gold-display').textContent = 'Итого: 0 GOLD';
     triggerAlert(`План "${name}" создан`, 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 function completePlan(id) {
     const p = state.plans.find(x => x.id === id);
@@ -1116,9 +1102,8 @@ function completePlan(id) {
     state.dayLogs[today] = dayData;
     saveState(); renderStats(); renderPlans(); renderCalendar(); renderDayRating();
     triggerAlert(`План выполнен! +${goldToAdd} GOLD, +20 HP`, 30);
-    if (navigator.vibrate) navigator.vibrate(30);
 }
-function deletePlan(id) { if (confirm('Удалить план?')) { state.plans = state.plans.filter(x => x.id !== id); saveState(); renderPlans(); triggerAlert('Удалено', 10); if (navigator.vibrate) navigator.vibrate(10); } }
+function deletePlan(id) { if (confirm('Удалить план?')) { state.plans = state.plans.filter(x => x.id !== id); saveState(); renderPlans(); triggerAlert('Удалено', 10); } }
 // ====== РАБОТА ======
 function renderWork() {
     const list = document.getElementById('work-list');
@@ -1140,7 +1125,6 @@ function addWork() {
     document.getElementById('work-name-input').value = '';
     document.getElementById('work-gold-per-hour-input').value = '';
     triggerAlert(`Проект "${name}" добавлен`, 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 function addWorkHour(id) {
     const w = state.work.find(x => x.id === id);
@@ -1159,9 +1143,8 @@ function addWorkHour(id) {
     state.dayLogs[today] = dayData;
     saveState(); renderStats(); renderWork(); renderShop(); renderCalendar(); renderDayRating();
     triggerAlert(`+${count} час(ов) работы, +${gold} GOLD`, 15);
-    if (navigator.vibrate) navigator.vibrate(15);
 }
-function deleteWork(id) { if (confirm('Удалить проект?')) { state.work = state.work.filter(x => x.id !== id); saveState(); renderWork(); triggerAlert('Удалено', 10); if (navigator.vibrate) navigator.vibrate(10); } }
+function deleteWork(id) { if (confirm('Удалить проект?')) { state.work = state.work.filter(x => x.id !== id); saveState(); renderWork(); triggerAlert('Удалено', 10); } }
 // ====== ФИНАНСЫ ======
 function renderFinance() {
     const list = document.getElementById('finance-list');
@@ -1211,7 +1194,6 @@ function addFinance(type) {
     document.getElementById('finance-amount-input').value = '';
     document.getElementById('finance-desc-input').value = '';
     triggerAlert('Транзакция добавлена', 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 // ====== МАГАЗИН ======
 function renderShop() {
@@ -1250,7 +1232,6 @@ function addShopItem() {
     document.getElementById('shop-name-input').value = '';
     document.getElementById('shop-price-input').value = '';
     triggerAlert('Товар добавлен', 20);
-    if (navigator.vibrate) navigator.vibrate(20);
 }
 function buyItem(id) {
     const item = state.shopItems.find(x => x.id === id);
@@ -1266,9 +1247,8 @@ function buyItem(id) {
     state.purchaseHistory.push({ name: item.name, price: item.price, date: new Date().toISOString() });
     saveState(); renderStats(); renderShop(); renderCalendar(); renderDayRating();
     triggerAlert(`Куплено: ${item.name}`, 30);
-    if (navigator.vibrate) navigator.vibrate(30);
 }
-function deleteShopItem(id) { if (confirm('Удалить товар из магазина?')) { state.shopItems = state.shopItems.filter(x => x.id !== id); saveState(); renderShop(); triggerAlert('Товар удалён', 10); if (navigator.vibrate) navigator.vibrate(10); } }
+function deleteShopItem(id) { if (confirm('Удалить товар из магазина?')) { state.shopItems = state.shopItems.filter(x => x.id !== id); saveState(); renderShop(); triggerAlert('Товар удалён', 10); } }
 // ====== ШТРАФ ======
 function applyPenalty() {
     const reason = document.getElementById('penalty-reason').value.trim() || 'Без причины';
@@ -1289,7 +1269,6 @@ function applyPenalty() {
     document.getElementById('last-penalty').innerHTML = `Последний штраф: ${penalty.text} (Причина: ${reason})`;
     triggerAlert(`⚡ ШТРАФ: ${penalty.text}`, 50);
     document.getElementById('penalty-reason').value = '';
-    if (navigator.vibrate) navigator.vibrate(50);
 }
 // ====== ДНЕВНИК ======
 function selectMood(mood, el) {
@@ -1319,7 +1298,6 @@ function addDiaryEntry() {
     state.selectedMood = null;
     document.querySelectorAll('.mood-option').forEach(opt => opt.style.borderColor = 'rgba(255,255,255,0.1)');
     triggerAlert('Запись сохранена', 15);
-    if (navigator.vibrate) navigator.vibrate(15);
 }
 // ====== СТАТЫ ======
 function renderStats() {
@@ -1383,6 +1361,14 @@ function importData(event) {
             if (!dataToLoad.bodyMetrics.height) dataToLoad.bodyMetrics.height = [];
             if (dataToLoad.notes === undefined) dataToLoad.notes = '';
             Object.assign(state, dataToLoad);
+            // Повторная инициализация для старых данных
+            state.sports.forEach(s => {
+                if (s.progression) {
+                    if (s.progressionInterval === undefined) s.progressionInterval = 1;
+                    if (s.progressionLimit === undefined) s.progressionLimit = 0;
+                    if (s.lastProgressionUpdate === undefined) s.lastProgressionUpdate = s.lastReset || todayStr();
+                }
+            });
             saveState();
             triggerAlert('✅ Данные импортированы! Страница будет перезагружена.', 30);
             setTimeout(() => location.reload(), 1500);
@@ -1409,9 +1395,9 @@ function toggleHpFields(prefix) {
 }
 function toggleSportProgression() {
     const checked = document.getElementById('sport-progression-toggle').checked;
-    const stepField = document.getElementById('sport-step-input');
-    if (checked) stepField.classList.remove('hidden-field');
-    else stepField.classList.add('hidden-field');
+    const fields = document.getElementById('sport-progression-fields');
+    if (checked) fields.classList.remove('hidden-field');
+    else fields.classList.add('hidden-field');
 }
 function toggleUrgentFields() {
     const checked = document.getElementById('plan-urgent-input').checked;
@@ -1639,7 +1625,7 @@ function init() {
     updateHabitRewardFields(); updateSportRewardFields();
     if (document.getElementById('habit-reset-interval-type').value === 'custom') document.getElementById('habit-reset-custom').classList.remove('hidden-field');
     if (document.getElementById('sport-reset-interval-type').value === 'custom') document.getElementById('sport-reset-custom').classList.remove('hidden-field');
-    triggerAlert('CyberRPG v23.0 загружен', 10);
+    triggerAlert('CyberRPG v23.1 загружен', 10);
     setInterval(checkDailyReset, 10000);
 }
 window.onload = init;
