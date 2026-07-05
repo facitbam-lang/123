@@ -108,7 +108,7 @@
             </div>
             <div>
                 <div class="text-lg font-bold tracking-widest" style="font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: var(--neon-glow);">CYBER_RPG</div>
-                <div class="text-[10px] text-gray-500">v23.1 · финал</div>
+                <div class="text-[10px] text-gray-500">v23.2 · финал</div>
             </div>
         </div>
         <div class="flex gap-3 text-xs">
@@ -401,10 +401,18 @@
             </div>
         </div>
     </div>
+    <!-- Модалка редактирования (общая для привычек и спорта) -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+            <h2 id="edit-modal-title">РЕДАКТИРОВАТЬ</h2>
+            <div id="edit-modal-body"></div>
+        </div>
+    </div>
     <div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a18] border border-[var(--neon)] shadow-[var(--neon-glow)] p-3 rounded-xl text-xs font-bold transition-all duration-500 translate-y-[200%] z-50 text-center max-w-xs backdrop-blur-sm">// SYSTEM: ONLINE</div>
 </div>
 <script>
-// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.1) ======
+// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.2) ======
 let state = {
     gold: 0, xp: 0, lvl: 1, int: 10, str: 10, hp: 100, balance: 0,
     activeTheme: '#00f0ff',
@@ -453,7 +461,6 @@ if (saved) {
         if (!state.bodyMetrics.weight) state.bodyMetrics.weight = [];
         if (!state.bodyMetrics.height) state.bodyMetrics.height = [];
         if (state.notes === undefined) state.notes = '';
-        // Инициализация новых полей для старых спортивных упражнений
         state.sports.forEach(s => {
             if (s.progression) {
                 if (s.progressionInterval === undefined) s.progressionInterval = 1;
@@ -475,12 +482,11 @@ function saveState() {
 }
 
 // ====== УБРАНЫ ВСЕ ВСПЫШКИ И ВИБРАЦИИ ======
-function triggerAlert(msg, vibro = 10) {
+function triggerAlert(msg) {
     const box = document.getElementById('alert-box');
     box.innerText = `// ${msg}`;
     box.classList.remove('translate-y-[200%]');
     setTimeout(() => box.classList.add('translate-y-[200%]'), 3000);
-    // Никаких вспышек, никаких вибраций
 }
 
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
@@ -488,7 +494,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ', 'body': 'ТЕЛО', 'notes': 'ЗАМЕТКИ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); if (id === 'body') renderBody(); if (id === 'notes') renderNotes(); }
 function changeTheme(color) { state.activeTheme = color; document.documentElement.style.setProperty('--neon', color); document.documentElement.style.setProperty('--neon-glow', `0 0 20px ${color}, 0 0 60px ${color}4d`); document.getElementById('custom-color-picker').value = color; document.getElementById('color-hex-display').textContent = color; saveState(); document.querySelectorAll('.color-preset').forEach(el => el.classList.toggle('active-preset', el.dataset.color === color)); }
 function selectPreset(el) { changeTheme(el.dataset.color); }
-function addPreset() { const color = document.getElementById('custom-color-picker').value; if (!state.colorPresets.includes(color)) { state.colorPresets.push(color); saveState(); renderPresets(); triggerAlert('Пресет добавлен', 10); } else { triggerAlert('Такой цвет уже есть', 10); } }
+function addPreset() { const color = document.getElementById('custom-color-picker').value; if (!state.colorPresets.includes(color)) { state.colorPresets.push(color); saveState(); renderPresets(); triggerAlert('Пресет добавлен'); } else { triggerAlert('Такой цвет уже есть'); } }
 function renderPresets() { const container = document.getElementById('custom-presets-container'); container.innerHTML = ''; state.colorPresets.forEach((color, index) => { if (index < 5) return; const div = document.createElement('div'); div.className = 'color-preset'; div.style.background = color; div.dataset.color = color; div.onclick = () => changeTheme(color); const removeBtn = document.createElement('button'); removeBtn.textContent = '✕'; removeBtn.className = 'text-[8px] text-gray-500 ml-1'; removeBtn.onclick = (e) => { e.stopPropagation(); state.colorPresets = state.colorPresets.filter(c => c !== color); saveState(); renderPresets(); }; div.appendChild(removeBtn); container.appendChild(div); }); }
 function formatDate(date) { const d = new Date(date); const day = String(d.getDate()).padStart(2, '0'); const month = String(d.getMonth() + 1).padStart(2, '0'); const year = d.getFullYear(); return `${day}.${month}.${year}`; }
 function formatDateInput(date) { const d = new Date(date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -496,17 +502,16 @@ function todayStr() { return formatDateInput(new Date()); }
 function getDayKey(date) { return formatDateInput(date); }
 function getDayData(date) { const key = getDayKey(date); if (!state.dayLogs[key]) { state.dayLogs[key] = { mood: null, diary: [], habits: [], sports: [], plans: [], work: [], finance: [], purchases: [], penalties: [] }; } return state.dayLogs[key]; }
 function getResetInterval(type, custom) { if (type === 'custom') return parseInt(custom) || 1; return parseInt(type); }
-function addXP(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить XP', 20); return; } state.xp += amount; const needed = 100 + (state.lvl - 1) * 10; while (state.xp >= needed) { state.xp -= needed; state.lvl += 1; let goldReward = state.levelBaseGold; if (state.levelProgression) { goldReward = state.levelBaseGold + (state.lvl - 1) * state.levelStep; } state.gold += goldReward; triggerAlert(`УРОВЕНЬ ${state.lvl} ДОСТИГНУТ! +${goldReward} GOLD`, 50); } saveState(); renderStats(); }
-function addGold(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить золото', 20); return; } state.gold += amount; saveState(); renderStats(); renderShop(); }
-function canEarnGold() { if (state.hp <= 0) { triggerAlert('HP = 0! Невозможно получить золото или XP. Восстановите HP!', 30); return false; } return true; }
-function checkShopBlocked() { if (state.hp < 20) { triggerAlert('HP < 20! Магазин заблокирован.', 20); return true; } if (state.shopBlocked && Date.now() < state.shopBlocked) { triggerAlert(`Магазин заблокирован до ${new Date(state.shopBlocked).toLocaleDateString()}`, 20); return true; } else { state.shopBlocked = 0; saveState(); } return false; }
+function addXP(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить XP'); return; } state.xp += amount; const needed = 100 + (state.lvl - 1) * 10; while (state.xp >= needed) { state.xp -= needed; state.lvl += 1; let goldReward = state.levelBaseGold; if (state.levelProgression) { goldReward = state.levelBaseGold + (state.lvl - 1) * state.levelStep; } state.gold += goldReward; triggerAlert(`УРОВЕНЬ ${state.lvl} ДОСТИГНУТ! +${goldReward} GOLD`); } saveState(); renderStats(); }
+function addGold(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить золото'); return; } state.gold += amount; saveState(); renderStats(); renderShop(); }
+function canEarnGold() { if (state.hp <= 0) { triggerAlert('HP = 0! Невозможно получить золото или XP. Восстановите HP!'); return false; } return true; }
+function checkShopBlocked() { if (state.hp < 20) { triggerAlert('HP < 20! Магазин заблокирован.'); return true; } if (state.shopBlocked && Date.now() < state.shopBlocked) { triggerAlert(`Магазин заблокирован до ${new Date(state.shopBlocked).toLocaleDateString()}`); return true; } else { state.shopBlocked = 0; saveState(); } return false; }
 function renderDayRating() { const today = todayStr(); const data = state.dayLogs[today]; if (!data) { document.getElementById('day-rating').textContent = '—'; return; } let score = 50; const moodMap = { 'Отличное': 100, 'Стабильное': 75, 'Спокойное': 50, 'Усталость': 25, 'Выгорание': 0 }; if (data.mood && moodMap[data.mood] !== undefined) { score = (score + moodMap[data.mood]) / 2; } if (data.habits) score += data.habits.length * 2; if (data.sports) score += data.sports.length * 2; if (data.diary && data.diary.length) score += 3; if (data.plans) score += data.plans.length * 5; if (data.work) { let totalHours = 0; data.work.forEach(w => totalHours += w.hours); score += totalHours * 2; } const financeToday = data.finance || []; let balanceChange = 0; financeToday.forEach(f => { if (f.type === 'income') balanceChange += f.amount; else balanceChange -= f.amount; }); score += Math.floor(balanceChange / 200); const allPrices = state.shopItems.map(item => item.price); const avgPrice = allPrices.length ? allPrices.reduce((a,b) => a+b, 0) / allPrices.length : 1; if (data.purchases) { data.purchases.forEach(p => { const relativePrice = avgPrice > 0 ? p.price / avgPrice : 1; const balanceFactor = p.price / (state.gold + 1); let penalty = Math.floor(relativePrice * 3 + balanceFactor * 2); penalty = Math.max(1, Math.min(15, penalty)); score -= penalty; }); } if (data.penalties) score -= data.penalties.length * 10; score = Math.max(0, Math.min(100, Math.round(score))); const el = document.getElementById('day-rating'); el.textContent = score; if (score >= 80) el.style.color = '#00ffaa'; else if (score >= 50) el.style.color = '#ffd600'; else el.style.color = '#ff0055'; }
 function checkDailyReset() {
     const lastDate = localStorage.getItem('cyberRPG_lastDate');
     const today = todayStr();
     if (lastDate && lastDate !== today) {
         const todayObj = new Date();
-        // Сброс привычек
         state.habits.forEach(h => {
             if (h.type === 'daily') {
                 const daysSinceReset = (todayObj - new Date(h.lastReset)) / (1000*60*60*24);
@@ -516,7 +521,6 @@ function checkDailyReset() {
                 }
             }
         });
-        // Спорт – прогрессия по интервалу и лимиту
         state.sports.forEach(s => {
             if (s.progression) {
                 const lastUpdate = new Date(s.lastProgressionUpdate || s.lastReset || today);
@@ -530,7 +534,6 @@ function checkDailyReset() {
                     s.lastProgressionUpdate = today;
                 }
             }
-            // Сброс current по интервалу (как и раньше)
             const daysSinceReset = (todayObj - new Date(s.lastReset)) / (1000*60*60*24);
             if (daysSinceReset >= s.resetInterval) {
                 s.current = 0;
@@ -565,15 +568,15 @@ function checkDailyReset() {
         });
         if (hpLoss > 0) {
             state.hp = Math.max(0, state.hp - hpLoss);
-            triggerAlert(`Потеряно ${hpLoss} HP`, 30);
+            triggerAlert(`Потеряно ${hpLoss} HP`);
         }
         if (hpGain > 0) {
             state.hp = Math.min(100, state.hp + hpGain);
-            triggerAlert(`Восстановлено ${hpGain} HP`, 10);
+            triggerAlert(`Восстановлено ${hpGain} HP`);
         }
         if (allMandatoryDone && hpLoss === 0) {
             state.hp = Math.min(100, state.hp + 5);
-            triggerAlert('+5 HP за хороший день', 10);
+            triggerAlert('+5 HP за хороший день');
         }
         saveState();
         localStorage.setItem('cyberRPG_lastDate', today);
@@ -660,11 +663,14 @@ function renderDayDetail(key) {
     const rating = document.getElementById('day-rating').textContent;
     label.textContent = `📅 ${formatDate(key)} ${data.mood ? '· ' + data.mood : ''}  |  Оценка: ${rating}`;
     let html = '';
-    let totalGold = 0;
-    let totalTasks = 0;
-    if (data.habits) totalTasks += data.habits.length;
-    if (data.sports) totalTasks += data.sports.length;
-    if (data.plans) totalTasks += data.plans.length;
+    // Общая статистика
+    let totalTasks = 0, totalGold = 0;
+    const habitCount = data.habits ? data.habits.length : 0;
+    const sportCount = data.sports ? data.sports.length : 0;
+    const planCount = data.plans ? data.plans.length : 0;
+    const workHours = data.work ? data.work.reduce((sum, w) => sum + w.hours, 0) : 0;
+    const purchaseItems = data.purchases ? data.purchases.length : 0;
+    totalTasks = habitCount + sportCount + planCount + workHours + purchaseItems;
     data.habits?.forEach(h => totalGold += h.gold || 0);
     data.sports?.forEach(s => totalGold += s.gold || 0);
     data.plans?.forEach(p => totalGold += p.gold || 0);
@@ -673,55 +679,81 @@ function renderDayDetail(key) {
         html += `<div class="summary-stat"><span class="label">✅ Выполнено задач</span><span class="value">${totalTasks}</span></div>`;
         html += `<div class="summary-stat"><span class="label">💰 Золото за день</span><span class="value">+${totalGold} GOLD</span></div>`;
     }
+
+    // Привычки – группировка по id (одна запись на привычку)
     if (data.habits && data.habits.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">🔄 ПРИВЫЧКИ</div>';
+        const habitMap = {};
         data.habits.forEach(h => {
-            const habit = state.habits.find(x => x.id === h.id);
-            const progress = habit ? `${habit.current || 0}/${habit.target}` : '';
-            const streak = habit && habit.streak > 0 ? `🔥 ${habit.streak} дн.` : '';
-            html += `<div class="day-detail-item flex justify-between"><span>${h.name} ${streak}</span><span class="text-green-400">+${h.gold || 0} GOLD (${progress})</span></div>`;
+            if (!habitMap[h.id]) {
+                const habit = state.habits.find(x => x.id === h.id);
+                habitMap[h.id] = { name: h.name, count: 0, gold: h.gold || 0, target: habit ? habit.target : 1 };
+            }
+            habitMap[h.id].count++;
         });
+        html += '<div class="text-[10px] text-gray-400 mt-3">🔄 ПРИВЫЧКИ</div>';
+        for (const id in habitMap) {
+            const item = habitMap[id];
+            const progress = `(${item.count}/${item.target})`;
+            const streak = state.habits.find(x => x.id === Number(id))?.streak;
+            const streakText = streak > 0 ? `🔥 ${streak} дн.` : '';
+            html += `<div class="day-detail-item flex justify-between"><span>${item.name} ×${item.count} ${streakText}</span><span class="text-green-400">+${item.gold * item.count} GOLD ${progress}</span></div>`;
+        }
     }
+
+    // Спорт – группировка по id
     if (data.sports && data.sports.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">💪 ТРЕНИРОВКИ</div>';
+        const sportMap = {};
         data.sports.forEach(s => {
-            const sport = state.sports.find(x => x.id === s.id);
-            let target = sport ? (sport.progression ? (sport.currentTarget || sport.baseTarget || sport.target) : sport.target) : 0;
-            const progress = sport ? `${sport.current || 0}/${target}` : '';
-            const streak = sport && sport.streak > 0 ? `🔥 ${sport.streak} дн.` : '';
-            html += `<div class="day-detail-item flex justify-between"><span>${s.name} ${streak}</span><span class="text-green-400">+${s.gold || 0} GOLD (${progress})</span></div>`;
+            if (!sportMap[s.id]) {
+                const sport = state.sports.find(x => x.id === s.id);
+                sportMap[s.id] = { name: s.name, count: 0, gold: s.gold || 0, unit: sport ? sport.unit : 'раз' };
+            }
+            sportMap[s.id].count++;
         });
+        html += '<div class="text-[10px] text-gray-400 mt-3">💪 ТРЕНИРОВКИ</div>';
+        for (const id in sportMap) {
+            const item = sportMap[id];
+            html += `<div class="day-detail-item flex justify-between"><span>${item.name} ×${item.count} ${item.unit}</span><span class="text-green-400">+${item.gold * item.count} GOLD</span></div>`;
+        }
     }
+
+    // Работа – группировка по названию
     if (data.work && data.work.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">💼 РАБОТА</div>';
         const workMap = {};
         data.work.forEach(w => {
             if (!workMap[w.name]) workMap[w.name] = { hours: 0, gold: 0 };
             workMap[w.name].hours += w.hours || 0;
             workMap[w.name].gold += w.gold || 0;
         });
+        html += '<div class="text-[10px] text-gray-400 mt-3">💼 РАБОТА</div>';
         for (const [name, val] of Object.entries(workMap)) {
             html += `<div class="day-detail-item flex justify-between"><span>${name} — ${val.hours} ч</span><span class="text-green-400">+${val.gold} GOLD</span></div>`;
         }
     }
+
+    // Планы
     if (data.plans && data.plans.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📋 ПЛАНЫ</div>';
         data.plans.forEach(p => {
             html += `<div class="day-detail-item flex justify-between"><span>${p.name}</span><span class="text-green-400">+${p.gold} GOLD</span></div>`;
         });
     }
+
+    // Покупки – группировка по названию
     if (data.purchases && data.purchases.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">🛒 ПОКУПКИ</div>';
         const purchaseMap = {};
         data.purchases.forEach(p => {
             if (!purchaseMap[p.name]) purchaseMap[p.name] = { count: 0, price: 0 };
-            purchaseMap[p.name].count += 1;
+            purchaseMap[p.name].count++;
             purchaseMap[p.name].price += p.price;
         });
+        html += '<div class="text-[10px] text-gray-400 mt-3">🛒 ПОКУПКИ</div>';
         for (const [name, val] of Object.entries(purchaseMap)) {
             html += `<div class="day-detail-item flex justify-between"><span>${name} ×${val.count}</span><span class="text-yellow-400">-${val.price} GOLD</span></div>`;
         }
     }
+
+    // Финансы
     if (data.finance && data.finance.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">💰 ФИНАНСЫ</div>';
         data.finance.forEach(f => {
@@ -730,12 +762,16 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${f.desc}</span><span class="${color}">${sign}${f.amount} ₽</span></div>`;
         });
     }
+
+    // Штрафы
     if (data.penalties && data.penalties.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">⚡ ШТРАФЫ</div>';
         data.penalties.forEach(p => {
             html += `<div class="day-detail-item">${p.reason || 'Без причины'} — ${p.penaltyText}</div>`;
         });
     }
+
+    // Дневник
     if (data.diary && data.diary.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📝 ДНЕВНИК</div>';
         data.diary.forEach(entry => {
@@ -753,7 +789,7 @@ function addFolder() {
     const name = document.getElementById('folder-name-input').value.trim();
     const modal = document.getElementById('folder-modal');
     const type = modal.dataset.folderType || 'habits';
-    if (!name) { triggerAlert('Введите название', 10); return; }
+    if (!name) { triggerAlert('Введите название'); return; }
     const folder = { id: Date.now().toString() + '_' + type, name: name };
     if (type === 'habits') state.habitFolders.push(folder);
     else state.sportFolders.push(folder);
@@ -761,10 +797,10 @@ function addFolder() {
     closeModal('folder-modal');
     document.getElementById('folder-name-input').value = '';
     renderHabits(); renderSports();
-    triggerAlert(`Папка "${name}" создана в разделе ${type === 'habits' ? 'Привычки' : 'Спорт'}`, 20);
+    triggerAlert(`Папка "${name}" создана`);
 }
-function deleteFolder(type, id) { if (!confirm('Удалить папку? Элементы не удалятся.')) return; const folders = type === 'habits' ? state.habitFolders : state.sportFolders; const idx = folders.findIndex(f => f.id === id); if (idx > -1) { folders.splice(idx, 1); const items = type === 'habits' ? state.habits : state.sports; items.forEach(item => { if (item.folderId === id) item.folderId = null; }); saveState(); renderHabits(); renderSports(); triggerAlert('Папка удалена', 10); } }
-function renameFolder(type, id) { const folders = type === 'habits' ? state.habitFolders : state.sportFolders; const folder = folders.find(f => f.id === id); if (!folder) return; const newName = prompt('Новое название папки:', folder.name); if (newName && newName.trim()) { folder.name = newName.trim(); saveState(); renderHabits(); renderSports(); triggerAlert('Папка переименована', 10); } }
+function deleteFolder(type, id) { if (!confirm('Удалить папку? Элементы не удалятся.')) return; const folders = type === 'habits' ? state.habitFolders : state.sportFolders; const idx = folders.findIndex(f => f.id === id); if (idx > -1) { folders.splice(idx, 1); const items = type === 'habits' ? state.habits : state.sports; items.forEach(item => { if (item.folderId === id) item.folderId = null; }); saveState(); renderHabits(); renderSports(); triggerAlert('Папка удалена'); } }
+function renameFolder(type, id) { const folders = type === 'habits' ? state.habitFolders : state.sportFolders; const folder = folders.find(f => f.id === id); if (!folder) return; const newName = prompt('Новое название папки:', folder.name); if (newName && newName.trim()) { folder.name = newName.trim(); saveState(); renderHabits(); renderSports(); triggerAlert('Папка переименована'); } }
 function openFolder(type, id) {
     if (type === 'habits') state.currentHabitFolder = id;
     else state.currentSportFolder = id;
@@ -780,7 +816,7 @@ function closeFolder(type) {
     document.getElementById(`${type}-breadcrumb`).style.display = 'inline';
     renderHabits(); renderSports();
 }
-function moveItemToFolder(type, itemId, folderId) { const items = type === 'habits' ? state.habits : state.sports; const item = items.find(it => it.id === itemId); if (item) { item.folderId = folderId || null; saveState(); renderHabits(); renderSports(); triggerAlert('Перемещено', 10); } }
+function moveItemToFolder(type, itemId, folderId) { const items = type === 'habits' ? state.habits : state.sports; const item = items.find(it => it.id === itemId); if (item) { item.folderId = folderId || null; saveState(); renderHabits(); renderSports(); triggerAlert('Перемещено'); } }
 // ====== РЕНДЕР ПРИВЫЧЕК ======
 function renderHabits() {
     checkDailyReset();
@@ -817,7 +853,7 @@ function renderHabits() {
         folderSelect += `<option value="">Без папки</option>`;
         folders.forEach(f => { folderSelect += `<option value="${f.id}" ${h.folderId === f.id ? 'selected' : ''}>${f.name}</option>`; });
         folderSelect += '</select>';
-        div.innerHTML = `<div><div class="text-sm font-semibold text-white">${h.name} ${mandatoryTag} ${streakText}</div><div class="text-[10px] text-gray-400">${h.stat} · ${h.type === 'daily' ? 'Ежедневная' : 'Долгосрочная'}</div><div class="text-[10px] text-gray-500">${progressText}</div><div class="text-[9px] text-gray-500">Сброс: ${h.resetInterval === 1 ? 'каждый день' : `каждые ${h.resetInterval} дн.`}</div></div><div class="flex items-center gap-2 flex-wrap">${folderSelect}<input type="number" id="habit-count-${h.id}" class="inline-input" value="1" min="1" style="width:50px;"><button class="cyber-btn text-[10px]" onclick="completeHabit(${h.id})">+</button>${done ? `<span class="text-green-400 text-xs ml-2">✅ Выполнено</span>` : ''}<button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteHabit(${h.id})"><i class="material-icons text-sm">delete</i></button></div>`;
+        div.innerHTML = `<div><div class="text-sm font-semibold text-white">${h.name} ${mandatoryTag} ${streakText}</div><div class="text-[10px] text-gray-400">${h.stat} · ${h.type === 'daily' ? 'Ежедневная' : 'Долгосрочная'}</div><div class="text-[10px] text-gray-500">${progressText}</div><div class="text-[9px] text-gray-500">Сброс: ${h.resetInterval === 1 ? 'каждый день' : `каждые ${h.resetInterval} дн.`}</div></div><div class="flex items-center gap-2 flex-wrap">${folderSelect}<input type="number" id="habit-count-${h.id}" class="inline-input" value="1" min="1" style="width:50px;"><button class="cyber-btn text-[10px]" onclick="completeHabit(${h.id})">+</button>${done ? `<span class="text-green-400 text-xs ml-2">✅ Выполнено</span>` : ''}<button class="text-gray-500 hover:text-red-400 ml-1" onclick="editHabit(${h.id})"><i class="material-icons text-sm">edit</i></button><button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteHabit(${h.id})"><i class="material-icons text-sm">delete</i></button></div>`;
         list.appendChild(div);
     });
     if (!filteredItems.length && !currentFolder) list.innerHTML += '<div class="text-xs text-gray-500 text-center py-4">Нет привычек</div>';
@@ -860,16 +896,134 @@ function renderSports() {
         folderSelect += `<option value="">Без папки</option>`;
         folders.forEach(f => { folderSelect += `<option value="${f.id}" ${s.folderId === f.id ? 'selected' : ''}>${f.name}</option>`; });
         folderSelect += '</select>';
-        div.innerHTML = `<div><div class="text-sm font-semibold text-white">${s.name} ${mandatoryTag} ${progTag} ${streakTag}</div><div class="text-[10px] text-gray-400">${s.unit || ''} · Ежедневная</div><div class="text-[10px] text-gray-500">${progressText}</div><div class="text-[9px] text-gray-500">Сброс: ${s.resetInterval === 1 ? 'каждый день' : `каждые ${s.resetInterval} дн.`}</div></div><div class="flex items-center gap-2 flex-wrap">${folderSelect}<input type="number" id="sport-count-${s.id}" class="inline-input" value="1" min="1" style="width:50px;"><button class="cyber-btn text-[10px]" onclick="completeSport(${s.id})">+</button>${done ? `<span class="text-green-400 text-xs ml-2">✅ Выполнено</span>` : ''}<button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteSport(${s.id})"><i class="material-icons text-sm">delete</i></button></div>`;
+        div.innerHTML = `<div><div class="text-sm font-semibold text-white">${s.name} ${mandatoryTag} ${progTag} ${streakTag}</div><div class="text-[10px] text-gray-400">${s.unit || ''} · Ежедневная</div><div class="text-[10px] text-gray-500">${progressText}</div><div class="text-[9px] text-gray-500">Сброс: ${s.resetInterval === 1 ? 'каждый день' : `каждые ${s.resetInterval} дн.`}</div></div><div class="flex items-center gap-2 flex-wrap">${folderSelect}<input type="number" id="sport-count-${s.id}" class="inline-input" value="1" min="1" style="width:50px;"><button class="cyber-btn text-[10px]" onclick="completeSport(${s.id})">+</button>${done ? `<span class="text-green-400 text-xs ml-2">✅ Выполнено</span>` : ''}<button class="text-gray-500 hover:text-red-400 ml-1" onclick="editSport(${s.id})"><i class="material-icons text-sm">edit</i></button><button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteSport(${s.id})"><i class="material-icons text-sm">delete</i></button></div>`;
         list.appendChild(div);
     });
     if (!filteredItems.length && !currentFolder) list.innerHTML += '<div class="text-xs text-gray-500 text-center py-4">Нет тренировок</div>';
     else if (!filteredItems.length && currentFolder) list.innerHTML += '<div class="text-xs text-gray-500 text-center py-4">В этой папке нет тренировок</div>';
 }
+// ====== РЕДАКТИРОВАНИЕ ======
+function editHabit(id) {
+    const h = state.habits.find(x => x.id === id);
+    if (!h) return;
+    const modal = document.getElementById('edit-modal');
+    const title = document.getElementById('edit-modal-title');
+    const body = document.getElementById('edit-modal-body');
+    title.textContent = 'РЕДАКТИРОВАТЬ ПРИВЫЧКУ';
+    body.innerHTML = `
+        <div class="space-y-3">
+            <input id="edit-habit-name" value="${h.name}" placeholder="Название">
+            <select id="edit-habit-stat"><option value="INT" ${h.stat==='INT'?'selected':''}>INT</option><option value="STR" ${h.stat==='STR'?'selected':''}>STR</option></select>
+            <select id="edit-habit-type"><option value="daily" ${h.type==='daily'?'selected':''}>Ежедневная</option><option value="longterm" ${h.type==='longterm'?'selected':''}>Долгосрочная</option></select>
+            <input id="edit-habit-target" type="number" value="${h.target}" min="1">
+            <select id="edit-habit-reward"><option value="per_step" ${h.rewardType==='per_step'?'selected':''}>За шаг</option><option value="per_target" ${h.rewardType==='per_target'?'selected':''}>За цель</option><option value="mixed" ${h.rewardType==='mixed'?'selected':''}>Смешанная</option></select>
+            <input id="edit-habit-gold-step" type="number" value="${h.goldPerStep}" min="0" placeholder="Золото за шаг">
+            <input id="edit-habit-gold-bonus" type="number" value="${h.goldBonus}" min="0" placeholder="Бонус за цель">
+            <div><label><input type="checkbox" id="edit-habit-mandatory" ${h.mandatory?'checked':''}> Обязательная (HP)</label></div>
+            <div id="edit-habit-hp-fields" class="sub-field ${h.mandatory?'':'hidden-field'}">
+                <input id="edit-habit-hp-loss" type="number" value="${h.hpLoss||0}" min="0" placeholder="Потеря HP">
+                <input id="edit-habit-hp-gain" type="number" value="${h.hpGain||0}" min="0" placeholder="Восстановление HP">
+            </div>
+            <button class="btn-primary" onclick="saveHabitEdit(${id})">СОХРАНИТЬ</button>
+        </div>
+    `;
+    // Показать/скрыть поля HP при изменении чекбокса
+    document.getElementById('edit-habit-mandatory').addEventListener('change', function() {
+        const fields = document.getElementById('edit-habit-hp-fields');
+        if (this.checked) fields.classList.remove('hidden-field');
+        else fields.classList.add('hidden-field');
+    });
+    openModal('edit-modal');
+}
+function saveHabitEdit(id) {
+    const h = state.habits.find(x => x.id === id);
+    if (!h) return;
+    h.name = document.getElementById('edit-habit-name').value.trim() || h.name;
+    h.stat = document.getElementById('edit-habit-stat').value;
+    h.type = document.getElementById('edit-habit-type').value;
+    h.target = Math.max(1, parseInt(document.getElementById('edit-habit-target').value) || h.target);
+    h.rewardType = document.getElementById('edit-habit-reward').value;
+    h.goldPerStep = Math.max(0, parseInt(document.getElementById('edit-habit-gold-step').value) || 0);
+    h.goldBonus = Math.max(0, parseInt(document.getElementById('edit-habit-gold-bonus').value) || 0);
+    h.mandatory = document.getElementById('edit-habit-mandatory').checked;
+    h.hpLoss = Math.max(0, parseInt(document.getElementById('edit-habit-hp-loss').value) || 0);
+    h.hpGain = Math.max(0, parseInt(document.getElementById('edit-habit-hp-gain').value) || 0);
+    saveState();
+    renderHabits();
+    closeModal('edit-modal');
+    triggerAlert('Привычка обновлена');
+}
+function editSport(id) {
+    const s = state.sports.find(x => x.id === id);
+    if (!s) return;
+    const modal = document.getElementById('edit-modal');
+    const title = document.getElementById('edit-modal-title');
+    const body = document.getElementById('edit-modal-body');
+    title.textContent = 'РЕДАКТИРОВАТЬ ТРЕНИРОВКУ';
+    body.innerHTML = `
+        <div class="space-y-3">
+            <input id="edit-sport-name" value="${s.name}" placeholder="Название">
+            <input id="edit-sport-target" type="number" value="${s.target}" min="1" placeholder="Цель">
+            <input id="edit-sport-unit" value="${s.unit||'раз'}" placeholder="Единица">
+            <select id="edit-sport-reward"><option value="per_step" ${s.rewardType==='per_step'?'selected':''}>За шаг</option><option value="per_target" ${s.rewardType==='per_target'?'selected':''}>За цель</option><option value="mixed" ${s.rewardType==='mixed'?'selected':''}>Смешанная</option></select>
+            <input id="edit-sport-gold-step" type="number" value="${s.goldPerStep}" min="0" placeholder="Золото за шаг">
+            <input id="edit-sport-gold-bonus" type="number" value="${s.goldBonus}" min="0" placeholder="Бонус за цель">
+            <div><label><input type="checkbox" id="edit-sport-progression" ${s.progression?'checked':''}> Прогрессия</label></div>
+            <div id="edit-sport-prog-fields" class="sub-field ${s.progression?'':'hidden-field'}">
+                <input id="edit-sport-step" type="number" value="${s.step||1}" min="1" placeholder="Шаг">
+                <input id="edit-sport-prog-interval" type="number" value="${s.progressionInterval||1}" min="1" placeholder="Интервал (дней)">
+                <input id="edit-sport-prog-limit" type="number" value="${s.progressionLimit||0}" min="0" placeholder="Лимит (0 = без)">
+            </div>
+            <div><label><input type="checkbox" id="edit-sport-mandatory" ${s.mandatory?'checked':''}> Обязательная (HP)</label></div>
+            <div id="edit-sport-hp-fields" class="sub-field ${s.mandatory?'':'hidden-field'}">
+                <input id="edit-sport-hp-loss" type="number" value="${s.hpLoss||0}" min="0" placeholder="Потеря HP">
+                <input id="edit-sport-hp-gain" type="number" value="${s.hpGain||0}" min="0" placeholder="Восстановление HP">
+            </div>
+            <button class="btn-primary" onclick="saveSportEdit(${id})">СОХРАНИТЬ</button>
+        </div>
+    `;
+    // Toggle для прогрессии
+    document.getElementById('edit-sport-progression').addEventListener('change', function() {
+        document.getElementById('edit-sport-prog-fields').classList.toggle('hidden-field', !this.checked);
+    });
+    document.getElementById('edit-sport-mandatory').addEventListener('change', function() {
+        document.getElementById('edit-sport-hp-fields').classList.toggle('hidden-field', !this.checked);
+    });
+    openModal('edit-modal');
+}
+function saveSportEdit(id) {
+    const s = state.sports.find(x => x.id === id);
+    if (!s) return;
+    s.name = document.getElementById('edit-sport-name').value.trim() || s.name;
+    s.target = Math.max(1, parseInt(document.getElementById('edit-sport-target').value) || s.target);
+    s.unit = document.getElementById('edit-sport-unit').value.trim() || 'раз';
+    s.rewardType = document.getElementById('edit-sport-reward').value;
+    s.goldPerStep = Math.max(0, parseInt(document.getElementById('edit-sport-gold-step').value) || 0);
+    s.goldBonus = Math.max(0, parseInt(document.getElementById('edit-sport-gold-bonus').value) || 0);
+    s.mandatory = document.getElementById('edit-sport-mandatory').checked;
+    s.hpLoss = Math.max(0, parseInt(document.getElementById('edit-sport-hp-loss').value) || 0);
+    s.hpGain = Math.max(0, parseInt(document.getElementById('edit-sport-hp-gain').value) || 0);
+    s.progression = document.getElementById('edit-sport-progression').checked;
+    if (s.progression) {
+        s.step = Math.max(1, parseInt(document.getElementById('edit-sport-step').value) || 1);
+        s.progressionInterval = Math.max(1, parseInt(document.getElementById('edit-sport-prog-interval').value) || 1);
+        s.progressionLimit = Math.max(0, parseInt(document.getElementById('edit-sport-prog-limit').value) || 0);
+        if (!s.currentTarget) s.currentTarget = s.target;
+    } else {
+        s.step = 0;
+        s.progressionInterval = 1;
+        s.progressionLimit = 0;
+        s.currentTarget = undefined;
+    }
+    saveState();
+    renderSports();
+    closeModal('edit-modal');
+    triggerAlert('Тренировка обновлена');
+}
 // ====== ПРИВЫЧКИ CRUD ======
 function addHabit() {
     const name = document.getElementById('habit-name-input').value.trim();
-    if (!name) { triggerAlert('Введите название', 10); return; }
+    if (!name) { triggerAlert('Введите название'); return; }
     const stat = document.getElementById('habit-stat-input').value;
     const type = document.getElementById('habit-type-input').value;
     const resetType = document.getElementById('habit-reset-interval-type').value;
@@ -895,7 +1049,7 @@ function addHabit() {
     document.getElementById('habit-mandatory-input').checked = false;
     document.getElementById('habit-hp-fields').classList.add('hidden-field');
     document.getElementById('habit-reset-custom').classList.add('hidden-field');
-    triggerAlert(`Привычка "${name}" создана`, 20);
+    triggerAlert(`Привычка "${name}" создана`);
 }
 function completeHabit(id) {
     const h = state.habits.find(x => x.id === id);
@@ -924,16 +1078,15 @@ function completeHabit(id) {
             dayData.habits.push({ id: h.id, name: h.name, gold: goldEarned });
             state.dayLogs[today] = dayData;
         }
-        // Серия обновляется ТОЛЬКО при достижении цели (как в спорте)
         updateStreak(h);
-        triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`, 30);
+        triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`);
     }
     if (h.stat === 'INT') state.int += 1;
     if (h.stat === 'STR') state.str += 1;
     saveState(); renderStats(); renderHabits(); renderCalendar(); renderDayRating();
-    triggerAlert(`+${goldEarned} GOLD, +${10*count} XP`, 15);
+    triggerAlert(`+${goldEarned} GOLD, +${10*count} XP`);
 }
-function deleteHabit(id) { if (confirm('Удалить привычку?')) { state.habits = state.habits.filter(x => x.id !== id); saveState(); renderHabits(); triggerAlert('Удалено', 10); } }
+function deleteHabit(id) { if (confirm('Удалить привычку?')) { state.habits = state.habits.filter(x => x.id !== id); saveState(); renderHabits(); triggerAlert('Удалено'); } }
 function updateStreak(habit) {
     const today = new Date().toDateString();
     if (habit.lastDate === today) return;
@@ -949,7 +1102,7 @@ function updateStreak(habit) {
 // ====== СПОРТ CRUD ======
 function addSport() {
     const name = document.getElementById('sport-name-input').value.trim();
-    if (!name) { triggerAlert('Введите название', 10); return; }
+    if (!name) { triggerAlert('Введите название'); return; }
     const resetType = document.getElementById('sport-reset-interval-type').value;
     const resetCustom = document.getElementById('sport-reset-custom').value;
     const resetInterval = getResetInterval(resetType, resetCustom);
@@ -989,7 +1142,7 @@ function addSport() {
     document.getElementById('sport-reset-custom').classList.add('hidden-field');
     document.getElementById('sport-hp-fields').classList.add('hidden-field');
     document.getElementById('sport-progression-fields').classList.add('hidden-field');
-    triggerAlert(`Тренировка "${name}" создана`, 20);
+    triggerAlert(`Тренировка "${name}" создана`);
 }
 function completeSport(id) {
     const s = state.sports.find(x => x.id === id);
@@ -1020,13 +1173,13 @@ function completeSport(id) {
             state.dayLogs[today] = dayData;
         }
         updateSportStreak(s);
-        triggerAlert(`Цель "${s.name}" достигнута! +${goldEarned} GOLD`, 30);
+        triggerAlert(`Цель "${s.name}" достигнута! +${goldEarned} GOLD`);
     }
     state.str += 1;
     saveState(); renderStats(); renderSports(); renderCalendar(); renderDayRating();
-    triggerAlert(`+${goldEarned} GOLD, +${15*count} XP`, 15);
+    triggerAlert(`+${goldEarned} GOLD, +${15*count} XP`);
 }
-function deleteSport(id) { if (confirm('Удалить тренировку?')) { state.sports = state.sports.filter(x => x.id !== id); saveState(); renderSports(); triggerAlert('Удалено', 10); } }
+function deleteSport(id) { if (confirm('Удалить тренировку?')) { state.sports = state.sports.filter(x => x.id !== id); saveState(); renderSports(); triggerAlert('Удалено'); } }
 function updateSportStreak(sport) {
     const today = new Date().toDateString();
     if (sport.lastDate === today) return;
@@ -1066,7 +1219,7 @@ function calculatePlanGold() {
 }
 function addPlan() {
     const name = document.getElementById('plan-name-input').value.trim();
-    if (!name) { triggerAlert('Введите название', 10); return; }
+    if (!name) { triggerAlert('Введите название'); return; }
     const deadline = document.getElementById('plan-deadline-input').value || null;
     const urgent = document.getElementById('plan-urgent-input').checked;
     const baseGold = parseInt(document.getElementById('plan-gold-input').value) || 0;
@@ -1074,7 +1227,7 @@ function addPlan() {
     const now = new Date();
     const isOverdue = deadline && new Date(deadline) < now;
     const finalGold = (urgent && !isOverdue) ? Math.floor(baseGold * (1 + bonusPercent/100)) : baseGold;
-    if (baseGold <= 0) { triggerAlert('Введите базовое золото', 10); return; }
+    if (baseGold <= 0) { triggerAlert('Введите базовое золото'); return; }
     state.plans.push({ id: Date.now(), name, deadline, urgent, bonusPercent, baseGold, finalGold, completed: false });
     saveState(); renderPlans(); closeModal('plan-modal');
     document.getElementById('plan-name-input').value = '';
@@ -1083,7 +1236,7 @@ function addPlan() {
     document.getElementById('plan-urgent-input').checked = false;
     document.getElementById('plan-urgent-fields').classList.add('hidden-field');
     document.getElementById('plan-total-gold-display').textContent = 'Итого: 0 GOLD';
-    triggerAlert(`План "${name}" создан`, 20);
+    triggerAlert(`План "${name}" создан`);
 }
 function completePlan(id) {
     const p = state.plans.find(x => x.id === id);
@@ -1101,9 +1254,9 @@ function completePlan(id) {
     dayData.plans.push({ name: p.name, gold: goldToAdd });
     state.dayLogs[today] = dayData;
     saveState(); renderStats(); renderPlans(); renderCalendar(); renderDayRating();
-    triggerAlert(`План выполнен! +${goldToAdd} GOLD, +20 HP`, 30);
+    triggerAlert(`План выполнен! +${goldToAdd} GOLD, +20 HP`);
 }
-function deletePlan(id) { if (confirm('Удалить план?')) { state.plans = state.plans.filter(x => x.id !== id); saveState(); renderPlans(); triggerAlert('Удалено', 10); } }
+function deletePlan(id) { if (confirm('Удалить план?')) { state.plans = state.plans.filter(x => x.id !== id); saveState(); renderPlans(); triggerAlert('Удалено'); } }
 // ====== РАБОТА ======
 function renderWork() {
     const list = document.getElementById('work-list');
@@ -1118,13 +1271,13 @@ function renderWork() {
 }
 function addWork() {
     const name = document.getElementById('work-name-input').value.trim();
-    if (!name) { triggerAlert('Введите название', 10); return; }
+    if (!name) { triggerAlert('Введите название'); return; }
     const goldPerHour = parseInt(document.getElementById('work-gold-per-hour-input').value) || 1;
     state.work.push({ id: Date.now(), name, goldPerHour, hours: 0, totalGold: 0 });
     saveState(); renderWork(); closeModal('work-modal');
     document.getElementById('work-name-input').value = '';
     document.getElementById('work-gold-per-hour-input').value = '';
-    triggerAlert(`Проект "${name}" добавлен`, 20);
+    triggerAlert(`Проект "${name}" добавлен`);
 }
 function addWorkHour(id) {
     const w = state.work.find(x => x.id === id);
@@ -1142,9 +1295,9 @@ function addWorkHour(id) {
     dayData.work.push({ name: w.name, hours: count, gold: gold });
     state.dayLogs[today] = dayData;
     saveState(); renderStats(); renderWork(); renderShop(); renderCalendar(); renderDayRating();
-    triggerAlert(`+${count} час(ов) работы, +${gold} GOLD`, 15);
+    triggerAlert(`+${count} час(ов) работы, +${gold} GOLD`);
 }
-function deleteWork(id) { if (confirm('Удалить проект?')) { state.work = state.work.filter(x => x.id !== id); saveState(); renderWork(); triggerAlert('Удалено', 10); } }
+function deleteWork(id) { if (confirm('Удалить проект?')) { state.work = state.work.filter(x => x.id !== id); saveState(); renderWork(); triggerAlert('Удалено'); } }
 // ====== ФИНАНСЫ ======
 function renderFinance() {
     const list = document.getElementById('finance-list');
@@ -1176,11 +1329,11 @@ function addFinance(type) {
     const amt = parseInt(document.getElementById('finance-amount-input').value);
     const desc = document.getElementById('finance-desc-input').value.trim() || 'Не указано';
     const date = document.getElementById('finance-date-input').value || todayStr();
-    if (!amt || amt <= 0) { triggerAlert('Введите сумму', 10); return; }
+    if (!amt || amt <= 0) { triggerAlert('Введите сумму'); return; }
     if (type === 'income') state.balance += amt;
     else {
         if (state.balance < amt) {
-            triggerAlert('Недостаточно средств!', 20);
+            triggerAlert('Недостаточно средств!');
             return;
         }
         state.balance -= amt;
@@ -1193,7 +1346,7 @@ function addFinance(type) {
     closeModal('finance-modal');
     document.getElementById('finance-amount-input').value = '';
     document.getElementById('finance-desc-input').value = '';
-    triggerAlert('Транзакция добавлена', 20);
+    triggerAlert('Транзакция добавлена');
 }
 // ====== МАГАЗИН ======
 function renderShop() {
@@ -1226,17 +1379,17 @@ function renderShop() {
 function addShopItem() {
     const name = document.getElementById('shop-name-input').value.trim();
     const price = parseInt(document.getElementById('shop-price-input').value);
-    if (!name || isNaN(price) || price <= 0) { triggerAlert('Введите название и цену', 10); return; }
+    if (!name || isNaN(price) || price <= 0) { triggerAlert('Введите название и цену'); return; }
     state.shopItems.push({ id: Date.now(), name, price });
     saveState(); renderShop(); closeModal('shop-modal');
     document.getElementById('shop-name-input').value = '';
     document.getElementById('shop-price-input').value = '';
-    triggerAlert('Товар добавлен', 20);
+    triggerAlert('Товар добавлен');
 }
 function buyItem(id) {
     const item = state.shopItems.find(x => x.id === id);
     if (!item) return;
-    if (state.gold < item.price) { triggerAlert('Не хватает золота!', 20); return; }
+    if (state.gold < item.price) { triggerAlert('Не хватает золота!'); return; }
     if (!confirm(`Купить "${item.name}" за ${item.price} GOLD?`)) return;
     state.gold -= item.price;
     const today = todayStr();
@@ -1246,9 +1399,9 @@ function buyItem(id) {
     state.dayLogs[today] = dayData;
     state.purchaseHistory.push({ name: item.name, price: item.price, date: new Date().toISOString() });
     saveState(); renderStats(); renderShop(); renderCalendar(); renderDayRating();
-    triggerAlert(`Куплено: ${item.name}`, 30);
+    triggerAlert(`Куплено: ${item.name}`);
 }
-function deleteShopItem(id) { if (confirm('Удалить товар из магазина?')) { state.shopItems = state.shopItems.filter(x => x.id !== id); saveState(); renderShop(); triggerAlert('Товар удалён', 10); } }
+function deleteShopItem(id) { if (confirm('Удалить товар из магазина?')) { state.shopItems = state.shopItems.filter(x => x.id !== id); saveState(); renderShop(); triggerAlert('Товар удалён'); } }
 // ====== ШТРАФ ======
 function applyPenalty() {
     const reason = document.getElementById('penalty-reason').value.trim() || 'Без причины';
@@ -1267,7 +1420,7 @@ function applyPenalty() {
     state.dayLogs[today] = dayData;
     saveState(); renderStats(); renderHabits(); renderSports(); renderShop(); renderCalendar(); renderDayRating();
     document.getElementById('last-penalty').innerHTML = `Последний штраф: ${penalty.text} (Причина: ${reason})`;
-    triggerAlert(`⚡ ШТРАФ: ${penalty.text}`, 50);
+    triggerAlert(`⚡ ШТРАФ: ${penalty.text}`);
     document.getElementById('penalty-reason').value = '';
 }
 // ====== ДНЕВНИК ======
@@ -1280,7 +1433,7 @@ function addDiaryEntry() {
     const date = document.getElementById('diary-date-input').value || todayStr();
     const mood = state.selectedMood || null;
     const text = document.getElementById('diary-text-input').value.trim();
-    if (!text) { triggerAlert('Введите текст', 10); return; }
+    if (!text) { triggerAlert('Введите текст'); return; }
     const dayData = getDayData(new Date(date));
     if (mood) dayData.mood = mood;
     if (!dayData.diary) dayData.diary = [];
@@ -1290,14 +1443,14 @@ function addDiaryEntry() {
     if (date === today && !dayData.diaryHpGained) {
         state.hp = Math.min(100, state.hp + 10);
         dayData.diaryHpGained = true;
-        triggerAlert('+10 HP за запись в дневнике', 15);
+        triggerAlert('+10 HP за запись в дневнике');
     }
     saveState(); renderStats(); renderCalendar(); renderDayRating();
     closeModal('diary-modal');
     document.getElementById('diary-text-input').value = '';
     state.selectedMood = null;
     document.querySelectorAll('.mood-option').forEach(opt => opt.style.borderColor = 'rgba(255,255,255,0.1)');
-    triggerAlert('Запись сохранена', 15);
+    triggerAlert('Запись сохранена');
 }
 // ====== СТАТЫ ======
 function renderStats() {
@@ -1329,12 +1482,12 @@ function exportData() {
     a.href = url;
     a.click();
     URL.revokeObjectURL(url);
-    triggerAlert('✅ Все данные экспортированы!', 20);
+    triggerAlert('✅ Все данные экспортированы!');
 }
 function importData(event) {
     const file = event.target.files[0];
-    if (!file) { triggerAlert('❌ Файл не выбран', 10); return; }
-    if (file.size > 10 * 1024 * 1024) { triggerAlert('❌ Файл слишком большой (макс. 10 МБ)', 30); return; }
+    if (!file) { triggerAlert('❌ Файл не выбран'); return; }
+    if (file.size > 10 * 1024 * 1024) { triggerAlert('❌ Файл слишком большой (макс. 10 МБ)'); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
@@ -1361,7 +1514,6 @@ function importData(event) {
             if (!dataToLoad.bodyMetrics.height) dataToLoad.bodyMetrics.height = [];
             if (dataToLoad.notes === undefined) dataToLoad.notes = '';
             Object.assign(state, dataToLoad);
-            // Повторная инициализация для старых данных
             state.sports.forEach(s => {
                 if (s.progression) {
                     if (s.progressionInterval === undefined) s.progressionInterval = 1;
@@ -1370,14 +1522,14 @@ function importData(event) {
                 }
             });
             saveState();
-            triggerAlert('✅ Данные импортированы! Страница будет перезагружена.', 30);
+            triggerAlert('✅ Данные импортированы! Страница будет перезагружена.');
             setTimeout(() => location.reload(), 1500);
         } catch (err) {
             console.error('Ошибка импорта:', err);
-            triggerAlert('❌ Ошибка импорта: ' + err.message, 30);
+            triggerAlert('❌ Ошибка импорта: ' + err.message);
         }
     };
-    reader.onerror = () => triggerAlert('❌ Не удалось прочитать файл', 30);
+    reader.onerror = () => triggerAlert('❌ Не удалось прочитать файл');
     reader.readAsText(file);
 }
 function resetSystem() {
@@ -1583,7 +1735,7 @@ function addBodyMeasurement() {
     const date = document.getElementById('body-date-input').value || todayStr();
     const weight = parseFloat(document.getElementById('body-weight-input').value);
     const height = parseFloat(document.getElementById('body-height-input').value);
-    if (isNaN(weight) && isNaN(height)) { triggerAlert('Введите вес или рост', 10); return; }
+    if (isNaN(weight) && isNaN(height)) { triggerAlert('Введите вес или рост'); return; }
     if (!isNaN(weight)) {
         state.bodyMetrics.weight.push({ date, value: weight });
         state.bodyMetrics.weight.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -1597,7 +1749,7 @@ function addBodyMeasurement() {
     closeModal('body-modal');
     document.getElementById('body-weight-input').value = '';
     document.getElementById('body-height-input').value = '';
-    triggerAlert('Данные сохранены', 15);
+    triggerAlert('Данные сохранены');
 }
 // ====== ЗАМЕТКИ ======
 function renderNotes() {
@@ -1606,7 +1758,7 @@ function renderNotes() {
 function saveNotes() {
     state.notes = document.getElementById('notes-textarea').value;
     saveState();
-    triggerAlert('Заметки сохранены', 15);
+    triggerAlert('Заметки сохранены');
 }
 // ====== ИНИЦИАЛИЗАЦИЯ ======
 function init() {
@@ -1625,7 +1777,7 @@ function init() {
     updateHabitRewardFields(); updateSportRewardFields();
     if (document.getElementById('habit-reset-interval-type').value === 'custom') document.getElementById('habit-reset-custom').classList.remove('hidden-field');
     if (document.getElementById('sport-reset-interval-type').value === 'custom') document.getElementById('sport-reset-custom').classList.remove('hidden-field');
-    triggerAlert('CyberRPG v23.1 загружен', 10);
+    triggerAlert('CyberRPG v23.2 загружен');
     setInterval(checkDailyReset, 10000);
 }
 window.onload = init;
