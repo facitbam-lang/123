@@ -108,7 +108,7 @@
             </div>
             <div>
                 <div class="text-lg font-bold tracking-widest" style="font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: var(--neon-glow);">CYBER_RPG</div>
-                <div class="text-[10px] text-gray-500">v23.2 · финал</div>
+                <div class="text-[10px] text-gray-500">v24.0 · финал</div>
             </div>
         </div>
         <div class="flex gap-3 text-xs">
@@ -136,6 +136,7 @@
         <button class="tab-btn" onclick="showTab('sport')">💪 СПОРТ</button>
         <button class="tab-btn" onclick="showTab('body')">📊 ТЕЛО</button>
         <button class="tab-btn" onclick="showTab('plans')">📋 ПЛАНЫ</button>
+        <button class="tab-btn" onclick="showTab('violations')">🚨 НАРУШЕНИЯ</button>
         <button class="tab-btn" onclick="showTab('work')">💼 РАБОТА</button>
         <button class="tab-btn" onclick="showTab('finance')">💰 ФИНАНСЫ</button>
         <button class="tab-btn" onclick="showTab('shop')">🛒 МАГАЗИН</button>
@@ -303,6 +304,7 @@
             <div class="help-card"><h3>🛒 Магазин</h3><p>Тратьте золото на покупки. Если золота недостаточно, кнопка «Купить» заменяется на «Штраф». Магазин блокируется при HP < 20.</p></div>
             <div class="help-card"><h3>💼 Работа</h3><p>Добавляйте проекты и зарабатывайте золото за каждый час. Каждый час приносит награду и повышает оценку дня.</p></div>
             <div class="help-card"><h3>📅 Календарь</h3><p>Цвет кружка дня отражает среднее настроение за день. При нажатии на день открывается подробная сводка.</p></div>
+            <div class="help-card"><h3>🚨 Нарушения</h3><p>Создавайте свои правила с потерями золота и HP. Нарушили правило – нажмите «НАРУШИЛ» и получите штраф. Все нарушения записываются в историю и дневник.</p></div>
         </div>
     </div>
     <!-- Вкладка ТЕЛО -->
@@ -340,6 +342,20 @@
             <textarea id="notes-textarea" class="w-full bg-[#090912] border border-white/10 text-white p-3 rounded-lg resize-none" rows="12" placeholder="Вводи текст здесь..."></textarea>
             <div class="flex justify-end mt-2">
                 <button class="cyber-btn text-xs" onclick="saveNotes()">💾 СОХРАНИТЬ</button>
+            </div>
+        </div>
+    </div>
+    <!-- Вкладка НАРУШЕНИЯ -->
+    <div id="tab-violations" class="tab-content hidden">
+        <div class="glass-card p-5 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-bold text-[var(--neon)] glow-text" style="font-family:'Orbitron',sans-serif;">🚨 НАРУШЕНИЯ</h2>
+                <button class="cyber-btn" onclick="openModal('violation-modal')">+ ДОБАВИТЬ ПРАВИЛО</button>
+            </div>
+            <div id="violations-list" class="space-y-3"></div>
+            <div class="mt-4">
+                <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ИСТОРИЯ НАРУШЕНИЙ</h3>
+                <div id="violation-history" class="max-h-[150px] overflow-y-auto space-y-1 mt-1"></div>
             </div>
         </div>
     </div>
@@ -409,10 +425,23 @@
             <div id="edit-modal-body"></div>
         </div>
     </div>
+    <!-- Модалка нарушения -->
+    <div id="violation-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('violation-modal')">✕</button>
+            <h2>ДОБАВИТЬ ПРАВИЛО</h2>
+            <div class="space-y-3">
+                <input id="violation-name-input" placeholder="Название (например, 'Лёг позже 3:00')">
+                <input id="violation-gold-penalty" type="number" placeholder="Потеря золота" min="0" value="50">
+                <input id="violation-hp-penalty" type="number" placeholder="Потеря HP" min="0" value="20">
+                <button class="btn-primary" onclick="addViolationRule()">СОЗДАТЬ ПРАВИЛО</button>
+            </div>
+        </div>
+    </div>
     <div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a18] border border-[var(--neon)] shadow-[var(--neon-glow)] p-3 rounded-xl text-xs font-bold transition-all duration-500 translate-y-[200%] z-50 text-center max-w-xs backdrop-blur-sm">// SYSTEM: ONLINE</div>
 </div>
 <script>
-// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.2) ======
+// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v24.0) ======
 let state = {
     gold: 0, xp: 0, lvl: 1, int: 10, str: 10, hp: 100, balance: 0,
     activeTheme: '#00f0ff',
@@ -436,9 +465,11 @@ let state = {
     currentSportFolder: null,
     selectedMood: null,
     bodyMetrics: { weight: [], height: [] },
-    notes: ''
+    notes: '',
+    violationRules: [],
+    violationHistory: []
 };
-const saved = localStorage.getItem('cyberRPG_v23');
+const saved = localStorage.getItem('cyberRPG_v24');
 if (saved) {
     try {
         const parsed = JSON.parse(saved);
@@ -461,6 +492,8 @@ if (saved) {
         if (!state.bodyMetrics.weight) state.bodyMetrics.weight = [];
         if (!state.bodyMetrics.height) state.bodyMetrics.height = [];
         if (state.notes === undefined) state.notes = '';
+        if (state.violationRules === undefined) state.violationRules = [];
+        if (state.violationHistory === undefined) state.violationHistory = [];
         state.sports.forEach(s => {
             if (s.progression) {
                 if (s.progressionInterval === undefined) s.progressionInterval = 1;
@@ -478,7 +511,7 @@ function saveState() {
         toSave.currentDate = new Date().toISOString();
     }
     toSave.selectedDate = state.selectedDate;
-    localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave));
+    localStorage.setItem('cyberRPG_v24', JSON.stringify(toSave));
 }
 
 // ====== УБРАНЫ ВСЕ ВСПЫШКИ И ВИБРАЦИИ ======
@@ -491,7 +524,7 @@ function triggerAlert(msg) {
 
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ', 'body': 'ТЕЛО', 'notes': 'ЗАМЕТКИ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); if (id === 'body') renderBody(); if (id === 'notes') renderNotes(); }
+function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ', 'body': 'ТЕЛО', 'notes': 'ЗАМЕТКИ', 'violations': 'НАРУШЕНИЯ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); if (id === 'body') renderBody(); if (id === 'notes') renderNotes(); if (id === 'violations') renderViolations(); }
 function changeTheme(color) { state.activeTheme = color; document.documentElement.style.setProperty('--neon', color); document.documentElement.style.setProperty('--neon-glow', `0 0 20px ${color}, 0 0 60px ${color}4d`); document.getElementById('custom-color-picker').value = color; document.getElementById('color-hex-display').textContent = color; saveState(); document.querySelectorAll('.color-preset').forEach(el => el.classList.toggle('active-preset', el.dataset.color === color)); }
 function selectPreset(el) { changeTheme(el.dataset.color); }
 function addPreset() { const color = document.getElementById('custom-color-picker').value; if (!state.colorPresets.includes(color)) { state.colorPresets.push(color); saveState(); renderPresets(); triggerAlert('Пресет добавлен'); } else { triggerAlert('Такой цвет уже есть'); } }
@@ -500,13 +533,13 @@ function formatDate(date) { const d = new Date(date); const day = String(d.getDa
 function formatDateInput(date) { const d = new Date(date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function todayStr() { return formatDateInput(new Date()); }
 function getDayKey(date) { return formatDateInput(date); }
-function getDayData(date) { const key = getDayKey(date); if (!state.dayLogs[key]) { state.dayLogs[key] = { mood: null, diary: [], habits: [], sports: [], plans: [], work: [], finance: [], purchases: [], penalties: [] }; } return state.dayLogs[key]; }
+function getDayData(date) { const key = getDayKey(date); if (!state.dayLogs[key]) { state.dayLogs[key] = { mood: null, diary: [], habits: [], sports: [], plans: [], work: [], finance: [], purchases: [], penalties: [], violations: [] }; } return state.dayLogs[key]; }
 function getResetInterval(type, custom) { if (type === 'custom') return parseInt(custom) || 1; return parseInt(type); }
 function addXP(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить XP'); return; } state.xp += amount; const needed = 100 + (state.lvl - 1) * 10; while (state.xp >= needed) { state.xp -= needed; state.lvl += 1; let goldReward = state.levelBaseGold; if (state.levelProgression) { goldReward = state.levelBaseGold + (state.lvl - 1) * state.levelStep; } state.gold += goldReward; triggerAlert(`УРОВЕНЬ ${state.lvl} ДОСТИГНУТ! +${goldReward} GOLD`); } saveState(); renderStats(); }
 function addGold(amount) { if (state.hp <= 0) { triggerAlert('HP = 0! Нельзя получить золото'); return; } state.gold += amount; saveState(); renderStats(); renderShop(); }
 function canEarnGold() { if (state.hp <= 0) { triggerAlert('HP = 0! Невозможно получить золото или XP. Восстановите HP!'); return false; } return true; }
 function checkShopBlocked() { if (state.hp < 20) { triggerAlert('HP < 20! Магазин заблокирован.'); return true; } if (state.shopBlocked && Date.now() < state.shopBlocked) { triggerAlert(`Магазин заблокирован до ${new Date(state.shopBlocked).toLocaleDateString()}`); return true; } else { state.shopBlocked = 0; saveState(); } return false; }
-function renderDayRating() { const today = todayStr(); const data = state.dayLogs[today]; if (!data) { document.getElementById('day-rating').textContent = '—'; return; } let score = 50; const moodMap = { 'Отличное': 100, 'Стабильное': 75, 'Спокойное': 50, 'Усталость': 25, 'Выгорание': 0 }; if (data.mood && moodMap[data.mood] !== undefined) { score = (score + moodMap[data.mood]) / 2; } if (data.habits) score += data.habits.length * 2; if (data.sports) score += data.sports.length * 2; if (data.diary && data.diary.length) score += 3; if (data.plans) score += data.plans.length * 5; if (data.work) { let totalHours = 0; data.work.forEach(w => totalHours += w.hours); score += totalHours * 2; } const financeToday = data.finance || []; let balanceChange = 0; financeToday.forEach(f => { if (f.type === 'income') balanceChange += f.amount; else balanceChange -= f.amount; }); score += Math.floor(balanceChange / 200); const allPrices = state.shopItems.map(item => item.price); const avgPrice = allPrices.length ? allPrices.reduce((a,b) => a+b, 0) / allPrices.length : 1; if (data.purchases) { data.purchases.forEach(p => { const relativePrice = avgPrice > 0 ? p.price / avgPrice : 1; const balanceFactor = p.price / (state.gold + 1); let penalty = Math.floor(relativePrice * 3 + balanceFactor * 2); penalty = Math.max(1, Math.min(15, penalty)); score -= penalty; }); } if (data.penalties) score -= data.penalties.length * 10; score = Math.max(0, Math.min(100, Math.round(score))); const el = document.getElementById('day-rating'); el.textContent = score; if (score >= 80) el.style.color = '#00ffaa'; else if (score >= 50) el.style.color = '#ffd600'; else el.style.color = '#ff0055'; }
+function renderDayRating() { const today = todayStr(); const data = state.dayLogs[today]; if (!data) { document.getElementById('day-rating').textContent = '—'; return; } let score = 50; const moodMap = { 'Отличное': 100, 'Стабильное': 75, 'Спокойное': 50, 'Усталость': 25, 'Выгорание': 0 }; if (data.mood && moodMap[data.mood] !== undefined) { score = (score + moodMap[data.mood]) / 2; } if (data.habits) score += data.habits.length * 2; if (data.sports) score += data.sports.length * 2; if (data.diary && data.diary.length) score += 3; if (data.plans) score += data.plans.length * 5; if (data.work) { let totalHours = 0; data.work.forEach(w => totalHours += w.hours); score += totalHours * 2; } const financeToday = data.finance || []; let balanceChange = 0; financeToday.forEach(f => { if (f.type === 'income') balanceChange += f.amount; else balanceChange -= f.amount; }); score += Math.floor(balanceChange / 200); const allPrices = state.shopItems.map(item => item.price); const avgPrice = allPrices.length ? allPrices.reduce((a,b) => a+b, 0) / allPrices.length : 1; if (data.purchases) { data.purchases.forEach(p => { const relativePrice = avgPrice > 0 ? p.price / avgPrice : 1; const balanceFactor = p.price / (state.gold + 1); let penalty = Math.floor(relativePrice * 3 + balanceFactor * 2); penalty = Math.max(1, Math.min(15, penalty)); score -= penalty; }); } if (data.penalties) score -= data.penalties.length * 10; if (data.violations) score -= data.violations.length * 15; score = Math.max(0, Math.min(100, Math.round(score))); const el = document.getElementById('day-rating'); el.textContent = score; if (score >= 80) el.style.color = '#00ffaa'; else if (score >= 50) el.style.color = '#ffd600'; else el.style.color = '#ff0055'; }
 function checkDailyReset() {
     const lastDate = localStorage.getItem('cyberRPG_lastDate');
     const today = todayStr();
@@ -670,7 +703,8 @@ function renderDayDetail(key) {
     const planCount = data.plans ? data.plans.length : 0;
     const workHours = data.work ? data.work.reduce((sum, w) => sum + w.hours, 0) : 0;
     const purchaseItems = data.purchases ? data.purchases.length : 0;
-    totalTasks = habitCount + sportCount + planCount + workHours + purchaseItems;
+    const violationCount = data.violations ? data.violations.length : 0;
+    totalTasks = habitCount + sportCount + planCount + workHours + purchaseItems + violationCount;
     data.habits?.forEach(h => totalGold += h.gold || 0);
     data.sports?.forEach(s => totalGold += s.gold || 0);
     data.plans?.forEach(p => totalGold += p.gold || 0);
@@ -719,7 +753,7 @@ function renderDayDetail(key) {
         }
     }
 
-    // Работа – группировка по названию
+    // Работа, планы, покупки, финансы, штрафы, дневник – без изменений (там нет count)
     if (data.work && data.work.length) {
         const workMap = {};
         data.work.forEach(w => {
@@ -733,7 +767,6 @@ function renderDayDetail(key) {
         }
     }
 
-    // Планы
     if (data.plans && data.plans.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📋 ПЛАНЫ</div>';
         data.plans.forEach(p => {
@@ -741,7 +774,6 @@ function renderDayDetail(key) {
         });
     }
 
-    // Покупки – группировка по названию
     if (data.purchases && data.purchases.length) {
         const purchaseMap = {};
         data.purchases.forEach(p => {
@@ -755,7 +787,6 @@ function renderDayDetail(key) {
         }
     }
 
-    // Финансы
     if (data.finance && data.finance.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">💰 ФИНАНСЫ</div>';
         data.finance.forEach(f => {
@@ -765,7 +796,6 @@ function renderDayDetail(key) {
         });
     }
 
-    // Штрафы
     if (data.penalties && data.penalties.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">⚡ ШТРАФЫ</div>';
         data.penalties.forEach(p => {
@@ -773,7 +803,13 @@ function renderDayDetail(key) {
         });
     }
 
-    // Дневник
+    if (data.violations && data.violations.length) {
+        html += '<div class="text-[10px] text-gray-400 mt-3">🚨 НАРУШЕНИЯ</div>';
+        data.violations.forEach(v => {
+            html += `<div class="day-detail-item flex justify-between"><span>${v.ruleName}</span><span class="text-red-400">-${v.goldPenalty || 0} GOLD, -${v.hpPenalty || 0} HP</span></div>`;
+        });
+    }
+
     if (data.diary && data.diary.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📝 ДНЕВНИК</div>';
         data.diary.forEach(entry => {
@@ -930,7 +966,6 @@ function editHabit(id) {
             <button class="btn-primary" onclick="saveHabitEdit(${id})">СОХРАНИТЬ</button>
         </div>
     `;
-    // Показать/скрыть поля HP при изменении чекбокса
     document.getElementById('edit-habit-mandatory').addEventListener('change', function() {
         const fields = document.getElementById('edit-habit-hp-fields');
         if (this.checked) fields.classList.remove('hidden-field');
@@ -985,7 +1020,6 @@ function editSport(id) {
             <button class="btn-primary" onclick="saveSportEdit(${id})">СОХРАНИТЬ</button>
         </div>
     `;
-    // Toggle для прогрессии
     document.getElementById('edit-sport-progression').addEventListener('change', function() {
         document.getElementById('edit-sport-prog-fields').classList.toggle('hidden-field', !this.checked);
     });
@@ -1082,7 +1116,6 @@ function completeHabit(id) {
         triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`);
     }
 
-    // Запись в дневник с указанием количества подходов
     if (!dayData.habits) dayData.habits = [];
     dayData.habits.push({ id: h.id, name: h.name, gold: goldEarned, count: count });
     state.dayLogs[today] = dayData;
@@ -1186,7 +1219,6 @@ function completeSport(id) {
         triggerAlert(`Цель "${s.name}" достигнута! +${goldEarned} GOLD`);
     }
 
-    // Запись в дневник с указанием количества подходов
     if (!dayData.sports) dayData.sports = [];
     dayData.sports.push({ id: s.id, name: s.name, gold: goldEarned, count: count });
     state.dayLogs[today] = dayData;
@@ -1446,6 +1478,91 @@ function applyPenalty() {
     triggerAlert(`⚡ ШТРАФ: ${penalty.text}`);
     document.getElementById('penalty-reason').value = '';
 }
+// ====== НАРУШЕНИЯ ======
+function renderViolations() {
+    const list = document.getElementById('violations-list');
+    list.innerHTML = '';
+    state.violationRules.forEach((rule, index) => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-4 flex flex-wrap justify-between items-center gap-3 fade-in';
+        div.innerHTML = `
+            <div>
+                <div class="text-sm font-semibold text-white">${rule.name}</div>
+                <div class="text-[10px] text-red-400">-${rule.goldPenalty || 0} GOLD, -${rule.hpPenalty || 0} HP</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="cyber-btn-danger text-[10px]" onclick="applyViolation(${index})">🚨 НАРУШИЛ</button>
+                <button class="text-gray-500 hover:text-red-400 ml-1" onclick="deleteViolationRule(${index})"><i class="material-icons text-sm">delete</i></button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+    if (!state.violationRules.length) {
+        list.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Нет правил</div>';
+    }
+
+    const history = document.getElementById('violation-history');
+    history.innerHTML = '';
+    state.violationHistory.slice(0, 20).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'bg-black/30 border border-white/5 p-1 rounded-lg text-[10px] flex justify-between';
+        div.innerHTML = `<span>${item.ruleName}</span><span class="text-red-400">-${item.goldPenalty || 0} GOLD, -${item.hpPenalty || 0} HP</span><span class="text-gray-500">${formatDate(item.date)}</span>`;
+        history.appendChild(div);
+    });
+    if (!state.violationHistory.length) {
+        history.innerHTML = '<div class="text-xs text-gray-500 text-center py-2">Нет нарушений</div>';
+    }
+}
+function addViolationRule() {
+    const name = document.getElementById('violation-name-input').value.trim();
+    const goldPenalty = parseInt(document.getElementById('violation-gold-penalty').value) || 0;
+    const hpPenalty = parseInt(document.getElementById('violation-hp-penalty').value) || 0;
+    if (!name) { triggerAlert('Введите название'); return; }
+    if (goldPenalty === 0 && hpPenalty === 0) { triggerAlert('Укажите хотя бы один штраф'); return; }
+    state.violationRules.push({ name, goldPenalty, hpPenalty });
+    saveState();
+    renderViolations();
+    closeModal('violation-modal');
+    document.getElementById('violation-name-input').value = '';
+    document.getElementById('violation-gold-penalty').value = '50';
+    document.getElementById('violation-hp-penalty').value = '20';
+    triggerAlert(`Правило "${name}" создано`);
+}
+function applyViolation(index) {
+    const rule = state.violationRules[index];
+    if (!rule) return;
+    if (!confirm(`Нарушить правило "${rule.name}"? Будет списано ${rule.goldPenalty} GOLD и ${rule.hpPenalty} HP.`)) return;
+    state.gold = Math.max(0, state.gold - rule.goldPenalty);
+    state.hp = Math.max(0, state.hp - rule.hpPenalty);
+    state.violationHistory.push({
+        ruleName: rule.name,
+        goldPenalty: rule.goldPenalty,
+        hpPenalty: rule.hpPenalty,
+        date: new Date().toISOString()
+    });
+    const today = todayStr();
+    const dayData = getDayData(new Date());
+    if (!dayData.violations) dayData.violations = [];
+    dayData.violations.push({
+        ruleName: rule.name,
+        goldPenalty: rule.goldPenalty,
+        hpPenalty: rule.hpPenalty
+    });
+    state.dayLogs[today] = dayData;
+    saveState();
+    renderStats();
+    renderViolations();
+    renderCalendar();
+    renderDayRating();
+    triggerAlert(`⚠️ Нарушено правило "${rule.name}"! -${rule.goldPenalty} GOLD, -${rule.hpPenalty} HP`);
+}
+function deleteViolationRule(index) {
+    if (!confirm('Удалить правило?')) return;
+    state.violationRules.splice(index, 1);
+    saveState();
+    renderViolations();
+    triggerAlert('Правило удалено');
+}
 // ====== ДНЕВНИК ======
 function selectMood(mood, el) {
     document.querySelectorAll('.mood-option').forEach(opt => opt.style.borderColor = 'rgba(255,255,255,0.1)');
@@ -1536,6 +1653,8 @@ function importData(event) {
             if (!dataToLoad.bodyMetrics.weight) dataToLoad.bodyMetrics.weight = [];
             if (!dataToLoad.bodyMetrics.height) dataToLoad.bodyMetrics.height = [];
             if (dataToLoad.notes === undefined) dataToLoad.notes = '';
+            if (dataToLoad.violationRules === undefined) dataToLoad.violationRules = [];
+            if (dataToLoad.violationHistory === undefined) dataToLoad.violationHistory = [];
             Object.assign(state, dataToLoad);
             state.sports.forEach(s => {
                 if (s.progression) {
@@ -1557,7 +1676,7 @@ function importData(event) {
 }
 function resetSystem() {
     if (confirm('Удалить ВСЕ данные?')) {
-        localStorage.removeItem('cyberRPG_v23');
+        localStorage.removeItem('cyberRPG_v24');
         location.reload();
     }
 }
@@ -1793,14 +1912,14 @@ function init() {
     document.getElementById('level-base-gold').addEventListener('change', function() { state.levelBaseGold = parseInt(this.value) || 50; saveState(); });
     document.getElementById('level-progression').addEventListener('change', function() { state.levelProgression = this.checked; saveState(); });
     document.getElementById('level-step').addEventListener('change', function() { state.levelStep = parseInt(this.value) || 5; saveState(); });
-    renderStats(); renderHabits(); renderSports(); renderPlans(); renderWork(); renderFinance(); renderShop(); renderCalendar(); renderDayRating(); renderBody(); renderNotes();
+    renderStats(); renderHabits(); renderSports(); renderPlans(); renderWork(); renderFinance(); renderShop(); renderCalendar(); renderDayRating(); renderBody(); renderNotes(); renderViolations();
     document.getElementById('diary-date-input').value = todayStr();
     document.getElementById('finance-date-input').value = todayStr();
     document.getElementById('body-date-input').value = todayStr();
     updateHabitRewardFields(); updateSportRewardFields();
     if (document.getElementById('habit-reset-interval-type').value === 'custom') document.getElementById('habit-reset-custom').classList.remove('hidden-field');
     if (document.getElementById('sport-reset-interval-type').value === 'custom') document.getElementById('sport-reset-custom').classList.remove('hidden-field');
-    triggerAlert('CyberRPG v23.2 загружен');
+    triggerAlert('CyberRPG v24.0 загружен');
     setInterval(checkDailyReset, 10000);
 }
 window.onload = init;
