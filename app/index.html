@@ -719,105 +719,6 @@ function renderDayDetail(key) {
         }
     }
 
-    // Работа, планы, покупки, финансы, штрафы, дневник – без изменений (там нет count)
-    if (data.work && data.work.length) {
-        const workMap = {};
-        data.work.forEach(w => {
-            if (!workMap[w.name]) workMap[w.name] = { hours: 0, gold: 0 };
-            workMap[w.name].hours += w.hours || 0;
-            workMap[w.name].gold += w.gold || 0;
-        });
-        html += '<div class="text-[10px] text-gray-400 mt-3">💼 РАБОТА</div>';
-        for (const [name, val] of Object.entries(workMap)) {
-            html += `<div class="day-detail-item flex justify-between"><span>${name} — ${val.hours} ч</span><span class="text-green-400">+${val.gold} GOLD</span></div>`;
-        }
-    }
-
-    if (data.plans && data.plans.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">📋 ПЛАНЫ</div>';
-        data.plans.forEach(p => {
-            html += `<div class="day-detail-item flex justify-between"><span>${p.name}</span><span class="text-green-400">+${p.gold} GOLD</span></div>`;
-        });
-    }
-
-    if (data.purchases && data.purchases.length) {
-        const purchaseMap = {};
-        data.purchases.forEach(p => {
-            if (!purchaseMap[p.name]) purchaseMap[p.name] = { count: 0, price: 0 };
-            purchaseMap[p.name].count++;
-            purchaseMap[p.name].price += p.price;
-        });
-        html += '<div class="text-[10px] text-gray-400 mt-3">🛒 ПОКУПКИ</div>';
-        for (const [name, val] of Object.entries(purchaseMap)) {
-            html += `<div class="day-detail-item flex justify-between"><span>${name} ×${val.count}</span><span class="text-yellow-400">-${val.price} GOLD</span></div>`;
-        }
-    }
-
-    if (data.finance && data.finance.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">💰 ФИНАНСЫ</div>';
-        data.finance.forEach(f => {
-            const sign = f.type === 'income' ? '+' : '-';
-            const color = f.type === 'income' ? 'text-green-400' : 'text-pink-400';
-            html += `<div class="day-detail-item flex justify-between"><span>${f.desc}</span><span class="${color}">${sign}${f.amount} ₽</span></div>`;
-        });
-    }
-
-    if (data.penalties && data.penalties.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">⚡ ШТРАФЫ</div>';
-        data.penalties.forEach(p => {
-            html += `<div class="day-detail-item">${p.reason || 'Без причины'} — ${p.penaltyText}</div>`;
-        });
-    }
-
-    if (data.diary && data.diary.length) {
-        html += '<div class="text-[10px] text-gray-400 mt-3">📝 ДНЕВНИК</div>';
-        data.diary.forEach(entry => {
-            const moodColors = { 'Отличное': '#00c853', 'Стабильное': '#a0d900', 'Спокойное': '#ffd600', 'Усталость': '#ff6d00', 'Выгорание': '#d50000' };
-            const color = moodColors[entry.mood] || '#888';
-            html += `<div class="day-detail-item"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color};vertical-align:middle;margin-right:8px;"></span> ${entry.text}</div>`;
-        });
-    }
-
-    if (!html) html = '<span class="text-gray-500">Нет записей</span>';
-    content.innerHTML = html;
-}
-    // Привычки – группировка по id (одна запись на привычку)
-    if (data.habits && data.habits.length) {
-        const habitMap = {};
-        data.habits.forEach(h => {
-            if (!habitMap[h.id]) {
-                const habit = state.habits.find(x => x.id === h.id);
-                habitMap[h.id] = { name: h.name, count: 0, gold: h.gold || 0, target: habit ? habit.target : 1 };
-            }
-            habitMap[h.id].count++;
-        });
-        html += '<div class="text-[10px] text-gray-400 mt-3">🔄 ПРИВЫЧКИ</div>';
-        for (const id in habitMap) {
-            const item = habitMap[id];
-            const progress = `(${item.count}/${item.target})`;
-            const streak = state.habits.find(x => x.id === Number(id))?.streak;
-            const streakText = streak > 0 ? `🔥 ${streak} дн.` : '';
-            html += `<div class="day-detail-item flex justify-between"><span>${item.name} ×${item.count} ${streakText}</span><span class="text-green-400">+${item.gold * item.count} GOLD ${progress}</span></div>`;
-        }
-    }
-
-    // Спорт – группировка по id
-    if (data.sports && data.sports.length) {
-        const sportMap = {};
-        data.sports.forEach(s => {
-            if (!sportMap[s.id]) {
-                const sport = state.sports.find(x => x.id === s.id);
-                sportMap[s.id] = { name: s.name, count: 0, gold: s.gold || 0, unit: sport ? sport.unit : 'раз' };
-            }
-            sportMap[s.id].count++;
-        });
-        html += '<div class="text-[10px] text-gray-400 mt-3">💪 ТРЕНИРОВКИ</div>';
-        for (const id in sportMap) {
-            const item = sportMap[id];
-            html += `<div class="day-detail-item flex justify-between"><span>${item.name} ×${item.count} ${item.unit}</span><span class="text-green-400">+${item.gold * item.count} GOLD</span></div>`;
-        }
-    }
-
     // Работа – группировка по названию
     if (data.work && data.work.length) {
         const workMap = {};
@@ -881,6 +782,7 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color};vertical-align:middle;margin-right:8px;"></span> ${entry.text}</div>`;
         });
     }
+
     if (!html) html = '<span class="text-gray-500">Нет записей</span>';
     content.innerHTML = html;
 }
