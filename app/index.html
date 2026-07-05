@@ -431,8 +431,11 @@ if (saved) {
     try {
         const parsed = JSON.parse(saved);
         Object.assign(state, parsed);
+        // Восстанавливаем дату с защитой от кривых данных
         state.currentDate = new Date(parsed.currentDate || Date.now());
+        if (isNaN(state.currentDate)) state.currentDate = new Date();
         state.selectedDate = parsed.selectedDate || new Date().toDateString();
+        // Все остальные проверки (они нужны, чтобы старые сохранения не сломались)
         if (!state.plans) state.plans = [];
         if (!state.work) state.work = [];
         if (!state.purchaseHistory) state.purchaseHistory = [];
@@ -450,7 +453,17 @@ if (saved) {
         if (state.notes === undefined) state.notes = '';
     } catch(e) { console.warn('Ошибка загрузки'); }
 }
-function saveState() { const toSave = { ...state }; toSave.currentDate = state.currentDate.toISOString(); toSave.selectedDate = state.selectedDate; localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave)); }
+function saveState() {
+    const toSave = { ...state };
+    // Гарантируем, что currentDate — валидный объект Date
+    if (state.currentDate instanceof Date && !isNaN(state.currentDate)) {
+        toSave.currentDate = state.currentDate.toISOString();
+    } else {
+        toSave.currentDate = new Date().toISOString(); // fallback
+    }
+    toSave.selectedDate = state.selectedDate;
+    localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave));
+}
 function triggerAlert(msg, vibro = 10) { const box = document.getElementById('alert-box'); box.innerText = `// ${msg}`; box.classList.remove('translate-y-[200%]'); setTimeout(() => box.classList.add('translate-y-[200%]'), 3000); if (navigator.vibrate) navigator.vibrate(vibro); }
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
