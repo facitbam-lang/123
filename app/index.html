@@ -1059,33 +1059,43 @@ function completeHabit(id) {
     const countInput = document.getElementById(`habit-count-${h.id}`);
     let count = Math.max(1, countInput ? parseInt(countInput.value) || 1 : 1);
     let goldEarned = 0;
+
+    // Золото за шаги
     if (h.rewardType === 'per_step' || h.rewardType === 'mixed') {
         goldEarned += h.goldPerStep * count;
         addGold(h.goldPerStep * count);
         addXP(10 * count);
     }
+
     const wasCompleted = (h.current || 0) >= h.target;
     h.current = (h.current || 0) + count;
+
+    // Бонус за достижение цели (только один раз)
     if (!wasCompleted && h.current >= h.target) {
         if (h.rewardType === 'per_target' || h.rewardType === 'mixed') {
-            const bonus = h.goldBonus;
-            goldEarned += bonus;
-            addGold(bonus);
+            goldEarned += h.goldBonus;
+            addGold(h.goldBonus);
             addXP(20);
         }
         triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`);
     }
-    // Запись в дневник (каждый подход)
+
+    // Запись в дневник (каждый подход – для календаря)
     if (!dayData.habits) dayData.habits = [];
     dayData.habits.push({ id: h.id, name: h.name, gold: goldEarned });
     state.dayLogs[today] = dayData;
 
-    // Серия обновляется при каждом подходе (можно убрать, если хочешь только за цель)
+    // Серия обновляется при каждом подходе, но только один раз в день (защита внутри updateStreak)
     updateStreak(h);
 
     if (h.stat === 'INT') state.int += 1;
     if (h.stat === 'STR') state.str += 1;
-    saveState(); renderStats(); renderHabits(); renderCalendar(); renderDayRating();
+
+    saveState();
+    renderStats();
+    renderHabits();
+    renderCalendar();
+    renderDayRating();
     triggerAlert(`+${goldEarned} GOLD, +${10*count} XP`);
 }
 function deleteHabit(id) { if (confirm('Удалить привычку?')) { state.habits = state.habits.filter(x => x.id !== id); saveState(); renderHabits(); triggerAlert('Удалено'); } }
@@ -1156,13 +1166,18 @@ function completeSport(id) {
     let goldEarned = 0;
     let target = s.target;
     if (s.progression) target = s.currentTarget || s.baseTarget || s.target;
+
+    // Золото за шаги
     if (s.rewardType === 'per_step' || s.rewardType === 'mixed') {
         goldEarned += s.goldPerStep * count;
         addGold(s.goldPerStep * count);
         addXP(15 * count);
     }
+
     const wasCompleted = (s.current || 0) >= target;
     s.current = (s.current || 0) + count;
+
+    // Бонус за достижение цели (только один раз)
     if (!wasCompleted && s.current >= target) {
         if (s.rewardType === 'per_target' || s.rewardType === 'mixed') {
             goldEarned += s.goldBonus;
@@ -1171,16 +1186,22 @@ function completeSport(id) {
         }
         triggerAlert(`Цель "${s.name}" достигнута! +${goldEarned} GOLD`);
     }
-    // Запись в дневник (каждый подход)
+
+    // Запись в дневник (каждый подход – для календаря)
     if (!dayData.sports) dayData.sports = [];
     dayData.sports.push({ id: s.id, name: s.name, gold: goldEarned });
     state.dayLogs[today] = dayData;
 
-    // Серия обновляется при каждом подходе
+    // Серия обновляется при каждом подходе, но только один раз в день
     updateSportStreak(s);
 
     state.str += 1;
-    saveState(); renderStats(); renderSports(); renderCalendar(); renderDayRating();
+
+    saveState();
+    renderStats();
+    renderSports();
+    renderCalendar();
+    renderDayRating();
     triggerAlert(`+${goldEarned} GOLD, +${15*count} XP`);
 }
 function deleteSport(id) { if (confirm('Удалить тренировку?')) { state.sports = state.sports.filter(x => x.id !== id); saveState(); renderSports(); triggerAlert('Удалено'); } }
