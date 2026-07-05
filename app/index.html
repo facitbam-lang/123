@@ -464,7 +464,51 @@ function saveState() {
     toSave.selectedDate = state.selectedDate;
     localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave));
 }
-function triggerAlert(msg, vibro = 10) { const box = document.getElementById('alert-box'); box.innerText = `// ${msg}`; box.classList.remove('translate-y-[200%]'); setTimeout(() => box.classList.add('translate-y-[200%]'), 3000); if (navigator.vibrate) navigator.vibrate(vibro); }
+// ====== ЗВУК "КАК ВИБРАЦИЯ" (для iPhone) ======
+function playSoftTap() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 180;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.05);
+    } catch(e) { /* молча игнорируем */ }
+}
+
+// Пробуждаем AudioContext при первом касании
+document.addEventListener('touchstart', function wakeAudio() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+    } catch(e) {}
+    document.removeEventListener('touchstart', wakeAudio);
+}, { once: true });
+
+// ====== УЛУЧШЕННЫЙ triggerAlert ======
+function triggerAlert(msg, vibro = 10) {
+    const box = document.getElementById('alert-box');
+    box.innerText = `// ${msg}`;
+    box.classList.remove('translate-y-[200%]');
+    setTimeout(() => box.classList.add('translate-y-[200%]'), 3000);
+    
+    // Визуальная вспышка (приятный отклик)
+    document.body.style.transition = 'background 0.15s';
+    document.body.style.background = 'rgba(0, 240, 255, 0.08)';
+    setTimeout(() => document.body.style.background = '', 200);
+    
+    // Звук + вибрация (если доступна)
+    if (navigator.vibrate) {
+        navigator.vibrate(vibro);
+    } else {
+        playSoftTap();
+    }
+}
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ', 'body': 'ТЕЛО', 'notes': 'ЗАМЕТКИ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); if (id === 'body') renderBody(); if (id === 'notes') renderNotes(); }
@@ -867,7 +911,6 @@ function addHabit() {
     document.getElementById('habit-reset-custom').classList.add('hidden-field');
     triggerAlert(`Привычка "${name}" создана`, 20);
     if (navigator.vibrate) navigator.vibrate(20);
-}
 function completeHabit(id) {
     const h = state.habits.find(x => x.id === id);
     if (!h) return;
@@ -895,8 +938,11 @@ function completeHabit(id) {
             dayData.habits.push({ id: h.id, name: h.name, gold: goldEarned });
             state.dayLogs[today] = dayData;
         }
+        // Серия обновляется ТОЛЬКО при достижении цели (как в спорте)
+        updateStreak(h);
+        triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`, 30);
     }
-    updateStreak(h);
+    // Внешний вызов updateStreak(h) УДАЛЁН – теперь серия только за полное выполнение
     if (h.stat === 'INT') state.int += 1;
     if (h.stat === 'STR') state.str += 1;
     saveState(); renderStats(); renderHabits(); renderCalendar(); renderDayRating();
