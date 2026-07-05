@@ -1222,16 +1222,34 @@ function renderStats() {
     document.getElementById('hp-bar').style.width = `${state.hp}%`;
 }
 // ====== ЭКСПОРТ / ИМПОРТ ======
+// ====== ПОЛНОСТЬЮ ОБНОВЛЁННЫЙ СКРИПТ (v23.0) ======
+// (Весь скрипт такой же, как в v22, но с улучшенным экспортом/импортом)
+// Для краткости я приведу только изменённые функции exportData и importData,
+// но если тебе нужен весь скрипт целиком, я выложу его отдельным сообщением.
+
+// Ниже представлены новые функции экспорта/импорта.
+// Вставь их вместо старых exportData и importData.
+// Если хочешь полную замену — я дам весь скрипт в следующем сообщении.
+
 function exportData() {
-    const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+    // Полный экспорт всех данных
+    const dataToExport = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        state: state
+    };
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
+    a.download = `CyberRPG_Backup_${dateStr}.json`;
     a.href = url;
-    a.download = 'cyberRPG_backup.json';
     a.click();
     URL.revokeObjectURL(url);
-    triggerAlert('Данные экспортированы', 20);
+    triggerAlert('Все данные экспортированы!', 20);
 }
+
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1239,16 +1257,32 @@ function importData(event) {
     reader.onload = (e) => {
         try {
             const data = JSON.parse(e.target.result);
-            Object.assign(state, data);
-            if (!state.plans) state.plans = [];
-            if (!state.work) state.work = [];
-            if (!state.purchaseHistory) state.purchaseHistory = [];
-            if (!state.shopItems) state.shopItems = [];
-            if (!state.colorPresets) state.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
-            saveState();
-            location.reload();
+            // Проверяем, что файл содержит state
+            if (data.state) {
+                // Полностью заменяем состояние
+                Object.assign(state, data.state);
+                // Убедимся, что все массивы существуют
+                if (!state.plans) state.plans = [];
+                if (!state.work) state.work = [];
+                if (!state.purchaseHistory) state.purchaseHistory = [];
+                if (!state.shopItems) state.shopItems = [];
+                if (!state.colorPresets) state.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
+                if (!state.habitFolders) state.habitFolders = [];
+                if (!state.sportFolders) state.sportFolders = [];
+                // Сохраняем и перезагружаем страницу
+                saveState();
+                location.reload();
+                triggerAlert('Данные успешно импортированы! Страница будет перезагружена.', 30);
+            } else {
+                // Для обратной совместимости: если файл содержит только state без обёртки
+                Object.assign(state, data);
+                saveState();
+                location.reload();
+                triggerAlert('Данные импортированы (старый формат).', 30);
+            }
         } catch(err) {
-            triggerAlert('Ошибка импорта', 30);
+            triggerAlert('Ошибка импорта: неверный формат файла.', 30);
+            console.error(err);
         }
     };
     reader.readAsText(file);
