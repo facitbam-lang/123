@@ -1247,44 +1247,84 @@ function exportData() {
     a.href = url;
     a.click();
     URL.revokeObjectURL(url);
-    triggerAlert('Все данные экспортированы!', 20);
+    triggerAlert('✅ Все данные экспортированы!', 20);
 }
 
 function importData(event) {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        triggerAlert('❌ Файл не выбран', 10);
+        return;
+    }
+    
+    // Проверка размера файла (максимум 10 МБ)
+    if (file.size > 10 * 1024 * 1024) {
+        triggerAlert('❌ Файл слишком большой (макс. 10 МБ)', 30);
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
-            const data = JSON.parse(e.target.result);
-            // Проверяем, что файл содержит state
-            if (data.state) {
-                // Полностью заменяем состояние
-                Object.assign(state, data.state);
-                // Убедимся, что все массивы существуют
-                if (!state.plans) state.plans = [];
-                if (!state.work) state.work = [];
-                if (!state.purchaseHistory) state.purchaseHistory = [];
-                if (!state.shopItems) state.shopItems = [];
-                if (!state.colorPresets) state.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
-                if (!state.habitFolders) state.habitFolders = [];
-                if (!state.sportFolders) state.sportFolders = [];
-                // Сохраняем и перезагружаем страницу
-                saveState();
-                location.reload();
-                triggerAlert('Данные успешно импортированы! Страница будет перезагружена.', 30);
-            } else {
-                // Для обратной совместимости: если файл содержит только state без обёртки
-                Object.assign(state, data);
-                saveState();
-                location.reload();
-                triggerAlert('Данные импортированы (старый формат).', 30);
+            let rawData = e.target.result;
+            
+            // Удаляем возможный BOM (Byte Order Mark) в начале файла
+            if (rawData.charCodeAt(0) === 0xFEFF) {
+                rawData = rawData.slice(1);
             }
-        } catch(err) {
-            triggerAlert('Ошибка импорта: неверный формат файла.', 30);
-            console.error(err);
+            
+            const parsed = JSON.parse(rawData);
+            
+            let dataToLoad = null;
+            
+            // Проверяем, есть ли обёртка с полем state
+            if (parsed.state && typeof parsed.state === 'object') {
+                dataToLoad = parsed.state;
+            } 
+            // Если нет обёртки, но сам объект похож на состояние (есть поля gold, xp и т.д.)
+            else if (parsed.gold !== undefined || parsed.habits || parsed.sports) {
+                dataToLoad = parsed;
+            } else {
+                throw new Error('Не удалось распознать структуру файла. Убедитесь, что это экспорт CyberRPG.');
+            }
+            
+            // Проверяем, что загружаемый объект содержит ключевые массивы
+            // Если их нет — создаём пустые, чтобы избежать ошибок
+            if (!dataToLoad.habits) dataToLoad.habits = [];
+            if (!dataToLoad.sports) dataToLoad.sports = [];
+            if (!dataToLoad.plans) dataToLoad.plans = [];
+            if (!dataToLoad.work) dataToLoad.work = [];
+            if (!dataToLoad.shopItems) dataToLoad.shopItems = [];
+            if (!dataToLoad.purchaseHistory) dataToLoad.purchaseHistory = [];
+            if (!dataToLoad.dayLogs) dataToLoad.dayLogs = {};
+            if (!dataToLoad.colorPresets) dataToLoad.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
+            if (!dataToLoad.habitFolders) dataToLoad.habitFolders = [];
+            if (!dataToLoad.sportFolders) dataToLoad.sportFolders = [];
+            if (!dataToLoad.currentHabitFolder) dataToLoad.currentHabitFolder = null;
+            if (!dataToLoad.currentSportFolder) dataToLoad.currentSportFolder = null;
+            
+            // Объединяем с текущим состоянием (полная замена)
+            Object.assign(state, dataToLoad);
+            
+            // Сохраняем в localStorage
+            saveState();
+            
+            // Показываем уведомление и перезагружаем страницу
+            triggerAlert('✅ Данные успешно импортированы! Страница будет перезагружена.', 30);
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+            
+        } catch (err) {
+            console.error('Ошибка импорта:', err);
+            triggerAlert('❌ Ошибка импорта: ' + err.message, 30);
         }
     };
+    
+    reader.onerror = () => {
+        triggerAlert('❌ Не удалось прочитать файл', 30);
+    };
+    
     reader.readAsText(file);
 }
 function resetSystem() {
