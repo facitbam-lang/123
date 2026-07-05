@@ -844,7 +844,7 @@ function renderHabits() {
     filteredItems.forEach(h => {
         const div = document.createElement('div');
         div.className = 'glass-card p-4 flex flex-wrap justify-between items-center gap-3 fade-in';
-        const done = (state.dayLogs[todayStr()]?.habits || []).some(x => x.id === h.id);
+        const done = (h.current || 0) >= h.target;
         let progressText = h.type === 'daily' ? `Сегодня: ${h.current || 0}/${h.target}` : `Всего: ${h.current || 0}/${h.target}`;
         if (done && (h.current || 0) > h.target) { const extra = (h.current || 0) - h.target; progressText += ` (+${extra})`; }
         const streakText = h.streak > 0 ? `<span class="tag" style="background:rgba(255,165,0,0.2);color:#ffa500;">🔥 ${h.streak} дн.</span>` : '';
@@ -886,7 +886,7 @@ function renderSports() {
         const div = document.createElement('div');
         div.className = 'glass-card p-4 flex flex-wrap justify-between items-center gap-3 fade-in';
         const target = s.progression ? (s.currentTarget || s.baseTarget || s.target) : s.target;
-        const done = s.progression ? ((s.current || 0) >= target) : ((state.dayLogs[todayStr()]?.sports || []).some(x => x.id === s.id));
+        const done = (s.current || 0) >= target;
         let progressText = `Сегодня: ${s.current || 0}/${target}`;
         if (done && (s.current || 0) > target) { const extra = (s.current || 0) - target; progressText += ` (+${extra})`; }
         const mandatoryTag = s.mandatory ? '<span class="tag">⭐ Обязательная</span>' : '';
@@ -1059,7 +1059,6 @@ function completeHabit(id) {
     const countInput = document.getElementById(`habit-count-${h.id}`);
     let count = Math.max(1, countInput ? parseInt(countInput.value) || 1 : 1);
     let goldEarned = 0;
-    // Начисляем за шаги
     if (h.rewardType === 'per_step' || h.rewardType === 'mixed') {
         goldEarned += h.goldPerStep * count;
         addGold(h.goldPerStep * count);
@@ -1067,7 +1066,6 @@ function completeHabit(id) {
     }
     const wasCompleted = (h.current || 0) >= h.target;
     h.current = (h.current || 0) + count;
-    // Проверяем, достигнута ли цель сейчас
     if (!wasCompleted && h.current >= h.target) {
         if (h.rewardType === 'per_target' || h.rewardType === 'mixed') {
             const bonus = h.goldBonus;
@@ -1075,13 +1073,15 @@ function completeHabit(id) {
             addGold(bonus);
             addXP(20);
         }
-        updateStreak(h);
         triggerAlert(`Цель "${h.name}" достигнута! +${goldEarned} GOLD`);
     }
-    // Добавляем запись в дневник (при каждом выполнении)
+    // Запись в дневник (каждый подход)
     if (!dayData.habits) dayData.habits = [];
     dayData.habits.push({ id: h.id, name: h.name, gold: goldEarned });
     state.dayLogs[today] = dayData;
+
+    // Серия обновляется при каждом подходе (можно убрать, если хочешь только за цель)
+    updateStreak(h);
 
     if (h.stat === 'INT') state.int += 1;
     if (h.stat === 'STR') state.str += 1;
@@ -1156,7 +1156,6 @@ function completeSport(id) {
     let goldEarned = 0;
     let target = s.target;
     if (s.progression) target = s.currentTarget || s.baseTarget || s.target;
-    // Начисляем за шаги
     if (s.rewardType === 'per_step' || s.rewardType === 'mixed') {
         goldEarned += s.goldPerStep * count;
         addGold(s.goldPerStep * count);
@@ -1164,20 +1163,21 @@ function completeSport(id) {
     }
     const wasCompleted = (s.current || 0) >= target;
     s.current = (s.current || 0) + count;
-    // Проверяем, достигнута ли цель сейчас
     if (!wasCompleted && s.current >= target) {
         if (s.rewardType === 'per_target' || s.rewardType === 'mixed') {
             goldEarned += s.goldBonus;
             addGold(s.goldBonus);
             addXP(25);
         }
-        updateSportStreak(s);
         triggerAlert(`Цель "${s.name}" достигнута! +${goldEarned} GOLD`);
     }
-    // Добавляем запись в дневник (при каждом выполнении)
+    // Запись в дневник (каждый подход)
     if (!dayData.sports) dayData.sports = [];
     dayData.sports.push({ id: s.id, name: s.name, gold: goldEarned });
     state.dayLogs[today] = dayData;
+
+    // Серия обновляется при каждом подходе
+    updateSportStreak(s);
 
     state.str += 1;
     saveState(); renderStats(); renderSports(); renderCalendar(); renderDayRating();
