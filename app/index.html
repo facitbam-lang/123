@@ -108,7 +108,7 @@
             </div>
             <div>
                 <div class="text-lg font-bold tracking-widest" style="font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: var(--neon-glow);">CYBER_RPG</div>
-                <div class="text-[10px] text-gray-500">v22.0 · финал</div>
+                <div class="text-[10px] text-gray-500">v23.0 · финал</div>
             </div>
         </div>
         <div class="flex gap-3 text-xs">
@@ -141,6 +141,8 @@
         <button class="tab-btn" onclick="showTab('penalty')">⚡ ШТРАФ</button>
         <button class="tab-btn" onclick="showTab('settings')">⚙️ НАСТР</button>
         <button class="tab-btn" onclick="showTab('help')">❓ ПОМОЩЬ</button>
+        <button class="tab-btn" onclick="showTab('body')">📊 ТЕЛО</button>
+        <button class="tab-btn" onclick="showTab('notes')">📝 ЗАМЕТКИ</button>
     </div>
     <!-- Вкладка Календарь -->
     <div id="tab-calendar" class="tab-content">
@@ -160,7 +162,7 @@
             </div>
         </div>
     </div>
-    <!-- Остальные вкладки (привычки, спорт, планы, работа, финансы, магазин, штраф, настройки, помощь) — без изменений, они уже рабочие -->
+    <!-- Вкладка Привычки -->
     <div id="tab-habits" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -176,6 +178,7 @@
             <div id="habits-list" class="space-y-3"></div>
         </div>
     </div>
+    <!-- Вкладка Спорт -->
     <div id="tab-sport" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -191,6 +194,7 @@
             <div id="sport-list" class="space-y-3"></div>
         </div>
     </div>
+    <!-- Вкладка Планы -->
     <div id="tab-plans" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -200,6 +204,7 @@
             <div id="plans-list" class="space-y-3"></div>
         </div>
     </div>
+    <!-- Вкладка Работа -->
     <div id="tab-work" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -209,6 +214,7 @@
             <div id="work-list" class="space-y-3"></div>
         </div>
     </div>
+    <!-- Вкладка Финансы -->
     <div id="tab-finance" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -218,6 +224,7 @@
             <div id="finance-list" class="space-y-1 max-h-[300px] overflow-y-auto"></div>
         </div>
     </div>
+    <!-- Вкладка Магазин -->
     <div id="tab-shop" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <div class="flex justify-between items-center mb-4">
@@ -234,6 +241,7 @@
             </div>
         </div>
     </div>
+    <!-- Вкладка Штраф -->
     <div id="tab-penalty" class="tab-content hidden">
         <div class="glass-card p-5 fade-in text-center">
             <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-3" style="font-family:'Orbitron',sans-serif;">⚡ ШТРАФ</h2>
@@ -243,6 +251,7 @@
             <div id="last-penalty" class="mt-4 text-xs text-gray-300"></div>
         </div>
     </div>
+    <!-- Вкладка Настройки -->
     <div id="tab-settings" class="tab-content hidden">
         <div class="glass-card p-5 fade-in">
             <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-3" style="font-family:'Orbitron',sans-serif;">НАСТРОЙКИ</h2>
@@ -282,6 +291,7 @@
             </div>
         </div>
     </div>
+    <!-- Вкладка Помощь -->
     <div id="tab-help" class="tab-content hidden">
         <div class="glass-card p-5 fade-in help-text">
             <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-4" style="font-family:'Orbitron',sans-serif;">❓ ПОМОЩЬ</h2>
@@ -293,6 +303,44 @@
             <div class="help-card"><h3>🛒 Магазин</h3><p>Тратьте золото на покупки. Если золота недостаточно, кнопка «Купить» заменяется на «Штраф». Магазин блокируется при HP < 20.</p></div>
             <div class="help-card"><h3>💼 Работа</h3><p>Добавляйте проекты и зарабатывайте золото за каждый час. Каждый час приносит награду и повышает оценку дня.</p></div>
             <div class="help-card"><h3>📅 Календарь</h3><p>Цвет кружка дня отражает среднее настроение за день. При нажатии на день открывается подробная сводка.</p></div>
+        </div>
+    </div>
+    <!-- Вкладка ТЕЛО -->
+    <div id="tab-body" class="tab-content hidden">
+        <div class="glass-card p-5 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-bold text-[var(--neon)] glow-text" style="font-family:'Orbitron',sans-serif;">📊 ТЕЛО</h2>
+                <button class="cyber-btn text-xs" onclick="openModal('body-modal')">+ ДОБАВИТЬ</button>
+            </div>
+            <div class="mb-4">
+                <canvas id="bodyChart" width="600" height="250" style="width:100%;height:250px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);"></canvas>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-white/5 border border-white/10 p-3 rounded text-center">
+                    <span class="text-xs text-gray-400">ТЕКУЩИЙ ВЕС</span>
+                    <div id="current-weight" class="text-xl font-bold text-white">—</div>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-3 rounded text-center">
+                    <span class="text-xs text-gray-400">ТЕКУЩИЙ РОСТ</span>
+                    <div id="current-height" class="text-xl font-bold text-white">—</div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">ИСТОРИЯ</h3>
+                <div id="body-history" class="max-h-[200px] overflow-y-auto space-y-1"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Вкладка ЗАМЕТКИ -->
+    <div id="tab-notes" class="tab-content hidden">
+        <div class="glass-card p-5 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-bold text-[var(--neon)] glow-text" style="font-family:'Orbitron',sans-serif;">📝 ЗАМЕТКИ</h2>
+            </div>
+            <textarea id="notes-textarea" class="w-full bg-[#090912] border border-white/10 text-white p-3 rounded-lg resize-none" rows="12" placeholder="Вводи текст здесь..."></textarea>
+            <div class="flex justify-end mt-2">
+                <button class="cyber-btn text-xs" onclick="saveNotes()">💾 СОХРАНИТЬ</button>
+            </div>
         </div>
     </div>
     <!-- Модалки -->
@@ -334,10 +382,25 @@
             </div>
         </div>
     </div>
+    <!-- Модалка ТЕЛО -->
+    <div id="body-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('body-modal')">✕</button>
+            <h2>ДОБАВИТЬ ЗАМЕР</h2>
+            <div class="space-y-3">
+                <input id="body-date-input" type="date" class="w-full">
+                <div class="flex gap-2">
+                    <input id="body-weight-input" type="number" placeholder="Вес (кг)" step="0.1" class="flex-1">
+                    <input id="body-height-input" type="number" placeholder="Рост (см)" step="0.1" class="flex-1">
+                </div>
+                <button class="btn-primary" onclick="addBodyMeasurement()">СОХРАНИТЬ</button>
+            </div>
+        </div>
+    </div>
     <div id="alert-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a18] border border-[var(--neon)] shadow-[var(--neon-glow)] p-3 rounded-xl text-xs font-bold transition-all duration-500 translate-y-[200%] z-50 text-center max-w-xs backdrop-blur-sm">// SYSTEM: ONLINE</div>
 </div>
 <script>
-// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v22.0) ======
+// ====== ПОЛНОСТЬЮ РАБОЧИЙ СКРИПТ (v23.0) ======
 let state = {
     gold: 0, xp: 0, lvl: 1, int: 10, str: 10, hp: 100, balance: 0,
     activeTheme: '#00f0ff',
@@ -359,9 +422,11 @@ let state = {
     sportFolders: [],
     currentHabitFolder: null,
     currentSportFolder: null,
-    selectedMood: null
+    selectedMood: null,
+    bodyMetrics: { weight: [], height: [] },
+    notes: ''
 };
-const saved = localStorage.getItem('cyberRPG_v22');
+const saved = localStorage.getItem('cyberRPG_v23');
 if (saved) {
     try {
         const parsed = JSON.parse(saved);
@@ -379,13 +444,17 @@ if (saved) {
         if (state.currentHabitFolder === undefined) state.currentHabitFolder = null;
         if (state.currentSportFolder === undefined) state.currentSportFolder = null;
         if (state.selectedMood === undefined) state.selectedMood = null;
+        if (!state.bodyMetrics) state.bodyMetrics = { weight: [], height: [] };
+        if (!state.bodyMetrics.weight) state.bodyMetrics.weight = [];
+        if (!state.bodyMetrics.height) state.bodyMetrics.height = [];
+        if (state.notes === undefined) state.notes = '';
     } catch(e) { console.warn('Ошибка загрузки'); }
 }
-function saveState() { const toSave = { ...state }; toSave.currentDate = state.currentDate.toISOString(); toSave.selectedDate = state.selectedDate; localStorage.setItem('cyberRPG_v22', JSON.stringify(toSave)); }
+function saveState() { const toSave = { ...state }; toSave.currentDate = state.currentDate.toISOString(); toSave.selectedDate = state.selectedDate; localStorage.setItem('cyberRPG_v23', JSON.stringify(toSave)); }
 function triggerAlert(msg, vibro = 10) { const box = document.getElementById('alert-box'); box.innerText = `// ${msg}`; box.classList.remove('translate-y-[200%]'); setTimeout(() => box.classList.add('translate-y-[200%]'), 3000); if (navigator.vibrate) navigator.vibrate(vibro); }
 function openModal(id, folderType) { if (id === 'folder-modal') { const modal = document.getElementById('folder-modal'); modal.dataset.folderType = folderType || 'habits'; } document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); }
+function showTab(id) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById(`tab-${id}`).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => { const map = { 'calendar': 'КАЛЕНДАРЬ', 'habits': 'ПРИВЫЧКИ', 'sport': 'СПОРТ', 'plans': 'ПЛАНЫ', 'work': 'РАБОТА', 'finance': 'ФИНАНСЫ', 'shop': 'МАГАЗИН', 'penalty': 'ШТРАФ', 'settings': 'НАСТР', 'help': 'ПОМОЩЬ', 'body': 'ТЕЛО', 'notes': 'ЗАМЕТКИ' }; if (el.textContent.includes(map[id])) el.classList.add('active'); }); checkDailyReset(); renderDayRating(); renderHabits(); renderSports(); if (id === 'body') renderBody(); if (id === 'notes') renderNotes(); }
 function changeTheme(color) { state.activeTheme = color; document.documentElement.style.setProperty('--neon', color); document.documentElement.style.setProperty('--neon-glow', `0 0 20px ${color}, 0 0 60px ${color}4d`); document.getElementById('custom-color-picker').value = color; document.getElementById('color-hex-display').textContent = color; saveState(); document.querySelectorAll('.color-preset').forEach(el => el.classList.toggle('active-preset', el.dataset.color === color)); }
 function selectPreset(el) { changeTheme(el.dataset.color); }
 function addPreset() { const color = document.getElementById('custom-color-picker').value; if (!state.colorPresets.includes(color)) { state.colorPresets.push(color); saveState(); renderPresets(); triggerAlert('Пресет добавлен', 10); } else { triggerAlert('Такой цвет уже есть', 10); } }
@@ -536,23 +605,18 @@ function renderCalendar() {
 }
 function changeMonth(delta) { state.currentDate.setMonth(state.currentDate.getMonth() + delta); renderCalendar(); saveState(); }
 function selectDay(key) { state.selectedDate = key; renderCalendar(); saveState(); renderDayRating(); }
-
-// ====== УЛУЧШЕННАЯ ФУНКЦИЯ СВОДКИ ДНЯ ======
 function renderDayDetail(key) {
     const label = document.getElementById('day-detail-label');
     const content = document.getElementById('day-detail-content');
     const data = state.dayLogs[key];
     if (!data) {
         label.textContent = `📅 ${formatDate(key)}`;
-        content.innerHTML = '<span class="text-gray-500">Нет записей за этот день</span>';
+        content.innerHTML = '<span class="text-gray-500">Нет записей</span>';
         return;
     }
     const rating = document.getElementById('day-rating').textContent;
     label.textContent = `📅 ${formatDate(key)} ${data.mood ? '· ' + data.mood : ''}  |  Оценка: ${rating}`;
-    
     let html = '';
-    
-    // Общая статистика за день
     let totalGold = 0;
     let totalTasks = 0;
     if (data.habits) totalTasks += data.habits.length;
@@ -562,13 +626,10 @@ function renderDayDetail(key) {
     data.sports?.forEach(s => totalGold += s.gold || 0);
     data.plans?.forEach(p => totalGold += p.gold || 0);
     data.work?.forEach(w => totalGold += w.gold || 0);
-    
     if (totalTasks > 0 || totalGold > 0) {
         html += `<div class="summary-stat"><span class="label">✅ Выполнено задач</span><span class="value">${totalTasks}</span></div>`;
         html += `<div class="summary-stat"><span class="label">💰 Золото за день</span><span class="value">+${totalGold} GOLD</span></div>`;
     }
-    
-    // Привычки
     if (data.habits && data.habits.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">🔄 ПРИВЫЧКИ</div>';
         data.habits.forEach(h => {
@@ -578,7 +639,6 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${h.name} ${streak}</span><span class="text-green-400">+${h.gold || 0} GOLD (${progress})</span></div>`;
         });
     }
-    // Спорт
     if (data.sports && data.sports.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">💪 ТРЕНИРОВКИ</div>';
         data.sports.forEach(s => {
@@ -589,7 +649,6 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${s.name} ${streak}</span><span class="text-green-400">+${s.gold || 0} GOLD (${progress})</span></div>`;
         });
     }
-    // Работа
     if (data.work && data.work.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">💼 РАБОТА</div>';
         const workMap = {};
@@ -602,14 +661,12 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${name} — ${val.hours} ч</span><span class="text-green-400">+${val.gold} GOLD</span></div>`;
         }
     }
-    // Планы
     if (data.plans && data.plans.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📋 ПЛАНЫ</div>';
         data.plans.forEach(p => {
             html += `<div class="day-detail-item flex justify-between"><span>${p.name}</span><span class="text-green-400">+${p.gold} GOLD</span></div>`;
         });
     }
-    // Покупки
     if (data.purchases && data.purchases.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">🛒 ПОКУПКИ</div>';
         const purchaseMap = {};
@@ -622,7 +679,6 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${name} ×${val.count}</span><span class="text-yellow-400">-${val.price} GOLD</span></div>`;
         }
     }
-    // Финансы
     if (data.finance && data.finance.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">💰 ФИНАНСЫ</div>';
         data.finance.forEach(f => {
@@ -631,14 +687,12 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item flex justify-between"><span>${f.desc}</span><span class="${color}">${sign}${f.amount} ₽</span></div>`;
         });
     }
-    // Штрафы
     if (data.penalties && data.penalties.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">⚡ ШТРАФЫ</div>';
         data.penalties.forEach(p => {
             html += `<div class="day-detail-item">${p.reason || 'Без причины'} — ${p.penaltyText}</div>`;
         });
     }
-    // Дневник
     if (data.diary && data.diary.length) {
         html += '<div class="text-[10px] text-gray-400 mt-3">📝 ДНЕВНИК</div>';
         data.diary.forEach(entry => {
@@ -647,7 +701,7 @@ function renderDayDetail(key) {
             html += `<div class="day-detail-item"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color};vertical-align:middle;margin-right:8px;"></span> ${entry.text}</div>`;
         });
     }
-    if (!html) html = '<span class="text-gray-500">Нет записей за этот день</span>';
+    if (!html) html = '<span class="text-gray-500">Нет записей</span>';
     content.innerHTML = html;
 }
 // ====== ПАПКИ ======
@@ -1221,112 +1275,68 @@ function renderStats() {
     document.getElementById('xp-bar').style.width = `${Math.min(100, (state.xp / needed) * 100)}%`;
     document.getElementById('hp-bar').style.width = `${state.hp}%`;
 }
+// ====== ЭКСПОРТ / ИМПОРТ ======
+function exportData() {
+    const dataToExport = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        state: state
+    };
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
+    a.download = `CyberRPG_Backup_${dateStr}.json`;
+    a.href = url;
+    a.click();
+    URL.revokeObjectURL(url);
+    triggerAlert('✅ Все данные экспортированы!', 20);
+}
 function importData(event) {
     const file = event.target.files[0];
-    
-    // Проверка: выбран ли файл
-    if (!file) {
-        triggerAlert('❌ Файл не выбран', 10);
-        return;
-    }
-    
-    // Проверка: не слишком ли большой файл
-    if (file.size > 10 * 1024 * 1024) { // 10 МБ
-        triggerAlert('❌ Файл слишком большой (макс. 10 МБ)', 30);
-        return;
-    }
-    
+    if (!file) { triggerAlert('❌ Файл не выбран', 10); return; }
+    if (file.size > 10 * 1024 * 1024) { triggerAlert('❌ Файл слишком большой (макс. 10 МБ)', 30); return; }
     const reader = new FileReader();
-    
-    // Обработчик успешного чтения
-    reader.onload = function(e) {
+    reader.onload = (e) => {
         try {
             let rawData = e.target.result;
-            
-            // Шаг 1: Удаляем BOM (невидимые символы в начале)
-            if (rawData.charCodeAt(0) === 0xFEFF) {
-                rawData = rawData.slice(1);
-            }
-            
-            // Шаг 2: Проверяем, что файл не пустой
-            if (!rawData || rawData.trim() === '') {
-                throw new Error('Файл пуст');
-            }
-            
-            // Шаг 3: Парсим JSON
-            let parsed;
-            try {
-                parsed = JSON.parse(rawData);
-            } catch (parseError) {
-                // Если парсинг не удался — показываем понятную ошибку
-                throw new Error('Не удалось распознать JSON. Проверьте, что файл не повреждён.');
-            }
-            
-            // Шаг 4: Определяем формат данных
+            if (rawData.charCodeAt(0) === 0xFEFF) rawData = rawData.slice(1);
+            if (!rawData || rawData.trim() === '') throw new Error('Файл пуст');
+            const parsed = JSON.parse(rawData);
             let dataToLoad = null;
-            
-            // Вариант А: файл содержит поле "state" (новый формат)
-            if (parsed.state && typeof parsed.state === 'object') {
-                dataToLoad = parsed.state;
-            }
-            // Вариант Б: файл — это сам объект состояния (старый формат)
-            else if (parsed.gold !== undefined || parsed.habits || parsed.sports) {
-                dataToLoad = parsed;
-            }
-            // Вариант В: непонятный формат
-            else {
-                throw new Error('Не удалось распознать структуру файла. Убедитесь, что это экспорт CyberRPG.');
-            }
-            
-            // Шаг 5: Проверяем, что в загруженных данных есть ключевые поля
-            // Если их нет — создаём пустые, чтобы избежать ошибок
-            const requiredFields = ['habits', 'sports', 'plans', 'work', 'shopItems', 'purchaseHistory', 'dayLogs'];
-            requiredFields.forEach(field => {
-                if (!dataToLoad[field]) {
-                    dataToLoad[field] = field === 'dayLogs' ? {} : [];
-                }
-            });
-            
-            // Дополнительные поля, которые могут отсутствовать
-            if (!dataToLoad.colorPresets) {
-                dataToLoad.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
-            }
+            if (parsed.state && typeof parsed.state === 'object') dataToLoad = parsed.state;
+            else if (parsed.gold !== undefined || parsed.habits || parsed.sports) dataToLoad = parsed;
+            else throw new Error('Не удалось распознать структуру файла.');
+            if (!dataToLoad.habits) dataToLoad.habits = [];
+            if (!dataToLoad.sports) dataToLoad.sports = [];
+            if (!dataToLoad.plans) dataToLoad.plans = [];
+            if (!dataToLoad.work) dataToLoad.work = [];
+            if (!dataToLoad.shopItems) dataToLoad.shopItems = [];
+            if (!dataToLoad.purchaseHistory) dataToLoad.purchaseHistory = [];
+            if (!dataToLoad.dayLogs) dataToLoad.dayLogs = {};
+            if (!dataToLoad.colorPresets) dataToLoad.colorPresets = ['#00f0ff', '#ff0055', '#39ff14', '#ffaa00', '#a020f0'];
             if (!dataToLoad.habitFolders) dataToLoad.habitFolders = [];
             if (!dataToLoad.sportFolders) dataToLoad.sportFolders = [];
-            if (dataToLoad.currentHabitFolder === undefined) dataToLoad.currentHabitFolder = null;
-            if (dataToLoad.currentSportFolder === undefined) dataToLoad.currentSportFolder = null;
-            
-            // Шаг 6: Применяем данные
+            if (!dataToLoad.bodyMetrics) dataToLoad.bodyMetrics = { weight: [], height: [] };
+            if (!dataToLoad.bodyMetrics.weight) dataToLoad.bodyMetrics.weight = [];
+            if (!dataToLoad.bodyMetrics.height) dataToLoad.bodyMetrics.height = [];
+            if (dataToLoad.notes === undefined) dataToLoad.notes = '';
             Object.assign(state, dataToLoad);
-            
-            // Шаг 7: Сохраняем в localStorage
             saveState();
-            
-            // Шаг 8: Уведомляем пользователя и перезагружаем страницу
-            triggerAlert('✅ Данные успешно импортированы! Страница будет перезагружена.', 30);
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-            
+            triggerAlert('✅ Данные импортированы! Страница будет перезагружена.', 30);
+            setTimeout(() => location.reload(), 1500);
         } catch (err) {
-            // Если что-то пошло не так — показываем понятную ошибку
             console.error('Ошибка импорта:', err);
             triggerAlert('❌ Ошибка импорта: ' + err.message, 30);
         }
     };
-    
-    // Обработчик ошибок чтения файла
-    reader.onerror = function() {
-        triggerAlert('❌ Не удалось прочитать файл. Попробуйте ещё раз.', 30);
-    };
-    
-    // Запускаем чтение
+    reader.onerror = () => triggerAlert('❌ Не удалось прочитать файл', 30);
     reader.readAsText(file);
-}
 }
 function resetSystem() {
     if (confirm('Удалить ВСЕ данные?')) {
-        localStorage.removeItem('cyberRPG_v22');
+        localStorage.removeItem('cyberRPG_v23');
         location.reload();
     }
 }
@@ -1396,6 +1406,163 @@ document.addEventListener('change', function(e) {
         else custom.classList.add('hidden-field');
     }
 });
+// ====== ТЕЛО (вес, рост) ======
+function renderBody() {
+    const weightData = state.bodyMetrics.weight || [];
+    const heightData = state.bodyMetrics.height || [];
+    const lastWeight = weightData.length ? weightData[weightData.length-1].value : '—';
+    const lastHeight = heightData.length ? heightData[heightData.length-1].value : '—';
+    document.getElementById('current-weight').textContent = lastWeight !== '—' ? lastWeight + ' кг' : '—';
+    document.getElementById('current-height').textContent = lastHeight !== '—' ? lastHeight + ' см' : '—';
+    const history = document.getElementById('body-history');
+    history.innerHTML = '';
+    const all = [];
+    weightData.forEach(w => all.push({ date: w.date, weight: w.value, height: null }));
+    heightData.forEach(h => all.push({ date: h.date, weight: null, height: h.value }));
+    all.sort((a,b) => new Date(a.date) - new Date(b.date));
+    if (all.length === 0) {
+        history.innerHTML = '<div class="text-xs text-gray-500 text-center py-4">Нет данных</div>';
+    } else {
+        all.slice(-20).forEach(entry => {
+            const div = document.createElement('div');
+            div.className = 'bg-black/30 border border-white/5 p-2 rounded text-xs flex justify-between items-center';
+            const dateStr = formatDate(entry.date);
+            let desc = dateStr;
+            if (entry.weight !== null) desc += `  ·  Вес: ${entry.weight} кг`;
+            if (entry.height !== null) desc += `  ·  Рост: ${entry.height} см`;
+            div.innerHTML = `<span>${desc}</span>`;
+            history.appendChild(div);
+        });
+    }
+    drawBodyChart(weightData, heightData);
+}
+function drawBodyChart(weightData, heightData) {
+    const canvas = document.getElementById('bodyChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    const allDates = {};
+    weightData.forEach(w => allDates[w.date] = { weight: w.value, height: null });
+    heightData.forEach(h => {
+        if (!allDates[h.date]) allDates[h.date] = { weight: null, height: h.value };
+        else allDates[h.date].height = h.value;
+    });
+    const sortedDates = Object.keys(allDates).sort();
+    if (sortedDates.length < 2) {
+        ctx.fillStyle = '#666';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Недостаточно данных для графика', w/2, h/2);
+        return;
+    }
+    let minWeight = Infinity, maxWeight = -Infinity, minHeight = Infinity, maxHeight = -Infinity;
+    sortedDates.forEach(date => {
+        const d = allDates[date];
+        if (d.weight !== null) { if (d.weight < minWeight) minWeight = d.weight; if (d.weight > maxWeight) maxWeight = d.weight; }
+        if (d.height !== null) { if (d.height < minHeight) minHeight = d.height; if (d.height > maxHeight) maxHeight = d.height; }
+    });
+    if (minWeight === Infinity) minWeight = minHeight - 10, maxWeight = maxHeight + 10;
+    if (minHeight === Infinity) minHeight = minWeight - 10, maxHeight = maxWeight + 10;
+    const padding = { top: 20, bottom: 30, left: 30, right: 20 };
+    const chartW = w - padding.left - padding.right;
+    const chartH = h - padding.top - padding.bottom;
+    const weightRange = maxWeight - minWeight || 1;
+    const heightRange = maxHeight - minHeight || 1;
+    function getYWeight(val) { return padding.top + chartH - ((val - minWeight) / weightRange) * chartH; }
+    function getYHeight(val) { return padding.top + chartH - ((val - minHeight) / heightRange) * chartH; }
+    function getX(index) { return padding.left + (index / (sortedDates.length - 1)) * chartW; }
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, padding.top + chartH);
+    ctx.lineTo(padding.left + chartW, padding.top + chartH);
+    ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(maxWeight.toFixed(1), padding.left - 5, padding.top);
+    ctx.fillText(minWeight.toFixed(1), padding.left - 5, padding.top + chartH);
+    const weightPoints = sortedDates.map((date, i) => ({ x: getX(i), y: getYWeight(allDates[date].weight ?? maxWeight) })).filter(p => p.y !== getYWeight(maxWeight) || p.x === padding.left);
+    if (weightPoints.length > 1) {
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        weightPoints.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#00f0ff';
+        weightPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 2*Math.PI); ctx.fill(); });
+    }
+    const heightPoints = sortedDates.map((date, i) => ({ x: getX(i), y: getYHeight(allDates[date].height ?? minHeight) })).filter(p => p.y !== getYHeight(minHeight) || p.x === padding.left);
+    if (heightPoints.length > 1) {
+        ctx.strokeStyle = '#ff6d00';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ff6d00';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        heightPoints.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ff6d00';
+        heightPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 2*Math.PI); ctx.fill(); });
+    }
+    ctx.font = '10px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#00f0ff';
+    ctx.fillRect(padding.left + 10, 10, 12, 12);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Вес', padding.left + 28, 10);
+    ctx.fillStyle = '#ff6d00';
+    ctx.fillRect(padding.left + 70, 10, 12, 12);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Рост', padding.left + 88, 10);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#888';
+    const step = Math.max(1, Math.floor(sortedDates.length / 6));
+    sortedDates.forEach((date, i) => {
+        if (i % step === 0 || i === sortedDates.length-1) {
+            const x = getX(i);
+            ctx.fillText(formatDate(date), x, padding.top + chartH + 4);
+        }
+    });
+}
+function addBodyMeasurement() {
+    const date = document.getElementById('body-date-input').value || todayStr();
+    const weight = parseFloat(document.getElementById('body-weight-input').value);
+    const height = parseFloat(document.getElementById('body-height-input').value);
+    if (isNaN(weight) && isNaN(height)) { triggerAlert('Введите вес или рост', 10); return; }
+    if (!isNaN(weight)) {
+        state.bodyMetrics.weight.push({ date, value: weight });
+        state.bodyMetrics.weight.sort((a,b) => new Date(a.date) - new Date(b.date));
+    }
+    if (!isNaN(height)) {
+        state.bodyMetrics.height.push({ date, value: height });
+        state.bodyMetrics.height.sort((a,b) => new Date(a.date) - new Date(b.date));
+    }
+    saveState();
+    renderBody();
+    closeModal('body-modal');
+    document.getElementById('body-weight-input').value = '';
+    document.getElementById('body-height-input').value = '';
+    triggerAlert('Данные сохранены', 15);
+}
+// ====== ЗАМЕТКИ ======
+function renderNotes() {
+    document.getElementById('notes-textarea').value = state.notes || '';
+}
+function saveNotes() {
+    state.notes = document.getElementById('notes-textarea').value;
+    saveState();
+    triggerAlert('Заметки сохранены', 15);
+}
+// ====== ИНИЦИАЛИЗАЦИЯ ======
 function init() {
     changeTheme(state.activeTheme);
     renderPresets();
@@ -1405,13 +1572,14 @@ function init() {
     document.getElementById('level-base-gold').addEventListener('change', function() { state.levelBaseGold = parseInt(this.value) || 50; saveState(); });
     document.getElementById('level-progression').addEventListener('change', function() { state.levelProgression = this.checked; saveState(); });
     document.getElementById('level-step').addEventListener('change', function() { state.levelStep = parseInt(this.value) || 5; saveState(); });
-    renderStats(); renderHabits(); renderSports(); renderPlans(); renderWork(); renderFinance(); renderShop(); renderCalendar(); renderDayRating();
+    renderStats(); renderHabits(); renderSports(); renderPlans(); renderWork(); renderFinance(); renderShop(); renderCalendar(); renderDayRating(); renderBody(); renderNotes();
     document.getElementById('diary-date-input').value = todayStr();
     document.getElementById('finance-date-input').value = todayStr();
+    document.getElementById('body-date-input').value = todayStr();
     updateHabitRewardFields(); updateSportRewardFields();
     if (document.getElementById('habit-reset-interval-type').value === 'custom') document.getElementById('habit-reset-custom').classList.remove('hidden-field');
     if (document.getElementById('sport-reset-interval-type').value === 'custom') document.getElementById('sport-reset-custom').classList.remove('hidden-field');
-    triggerAlert('CyberRPG v22.0 загружен', 10);
+    triggerAlert('CyberRPG v23.0 загружен', 10);
     setInterval(checkDailyReset, 10000);
 }
 window.onload = init;
