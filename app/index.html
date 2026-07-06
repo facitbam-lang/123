@@ -254,44 +254,45 @@
     </div>
     <!-- Вкладка Настройки -->
     <div id="tab-settings" class="tab-content hidden">
-        <div class="glass-card p-5 fade-in">
-            <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-3" style="font-family:'Orbitron',sans-serif;">НАСТРОЙКИ</h2>
-            <div class="mb-4">
-                <p class="text-xs text-gray-400 mb-2">НЕОНОВЫЙ ЦВЕТ</p>
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <input type="color" id="custom-color-picker" class="w-12 h-12 rounded-full border-2 border-white/10 cursor-pointer" value="#00f0ff" onchange="changeTheme(this.value)">
-                    <span class="text-xs text-gray-400">HEX: <span id="color-hex-display">#00f0ff</span></span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button class="color-preset active-preset" style="background:#00f0ff;" data-color="#00f0ff" onclick="selectPreset(this)"></button>
-                    <button class="color-preset" style="background:#ff0055;" data-color="#ff0055" onclick="selectPreset(this)"></button>
-                    <button class="color-preset" style="background:#39ff14;" data-color="#39ff14" onclick="selectPreset(this)"></button>
-                    <button class="color-preset" style="background:#ffaa00;" data-color="#ffaa00" onclick="selectPreset(this)"></button>
-                    <button class="color-preset" style="background:#a020f0;" data-color="#a020f0" onclick="selectPreset(this)"></button>
-                </div>
-                <div id="custom-presets-container" class="flex flex-wrap gap-2 mt-2"></div>
-                <button class="cyber-btn text-[10px] py-1 px-3 mt-2" onclick="addPreset()">+ Добавить пресет</button>
+    <div class="glass-card p-5 fade-in">
+        <h2 class="text-base font-bold text-[var(--neon)] glow-text mb-3" style="font-family:'Orbitron',sans-serif;">НАСТРОЙКИ</h2>
+        <div class="mb-4">
+            <p class="text-xs text-gray-400 mb-2">НЕОНОВЫЙ ЦВЕТ</p>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <input type="color" id="custom-color-picker" class="w-12 h-12 rounded-full border-2 border-white/10 cursor-pointer" value="#00f0ff" onchange="changeTheme(this.value)">
+                <span class="text-xs text-gray-400">HEX: <span id="color-hex-display">#00f0ff</span></span>
             </div>
-            <div class="mb-4 border-t border-white/5 pt-4">
-                <p class="text-xs text-gray-400 mb-2">НАГРАДА ЗА УРОВЕНЬ</p>
-                <div class="flex flex-wrap items-center gap-3">
-                    <label class="text-xs text-gray-300">Базовое золото:</label>
-                    <input type="number" id="level-base-gold" class="inline-input" style="width:80px;" value="50" min="1">
-                    <label class="text-xs text-gray-300">Прогрессия:</label>
-                    <input type="checkbox" id="level-progression" checked>
-                    <label class="text-xs text-gray-300">Шаг:</label>
-                    <input type="number" id="level-step" class="inline-input" style="width:60px;" value="5" min="1">
-                </div>
-                <div class="text-xs text-gray-500 mt-1">Формула: базовое + (уровень × шаг) (если прогрессия включена)</div>
+            <div class="flex flex-wrap gap-2">
+                <button class="color-preset active-preset" style="background:#00f0ff;" data-color="#00f0ff" onclick="selectPreset(this)"></button>
+                <button class="color-preset" style="background:#ff0055;" data-color="#ff0055" onclick="selectPreset(this)"></button>
+                <button class="color-preset" style="background:#39ff14;" data-color="#39ff14" onclick="selectPreset(this)"></button>
+                <button class="color-preset" style="background:#ffaa00;" data-color="#ffaa00" onclick="selectPreset(this)"></button>
+                <button class="color-preset" style="background:#a020f0;" data-color="#a020f0" onclick="selectPreset(this)"></button>
             </div>
-            <div class="border-t border-white/5 pt-4 flex flex-wrap gap-2">
-                <button class="cyber-btn text-xs" onclick="exportData()">💾 Экспорт</button>
-                <button class="cyber-btn text-xs" onclick="document.getElementById('import-file').click()">📂 Импорт</button>
-                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-                <button class="cyber-btn-danger text-xs" onclick="resetSystem()">🗑️ Сброс</button>
+            <div id="custom-presets-container" class="flex flex-wrap gap-2 mt-2"></div>
+            <button class="cyber-btn text-[10px] py-1 px-3 mt-2" onclick="addPreset()">+ Добавить пресет</button>
+        </div>
+        <div class="mb-4 border-t border-white/5 pt-4">
+            <p class="text-xs text-gray-400 mb-2">НАГРАДА ЗА УРОВЕНЬ</p>
+            <div class="flex flex-wrap items-center gap-3">
+                <label class="text-xs text-gray-300">Базовое золото:</label>
+                <input type="number" id="level-base-gold" class="inline-input" style="width:80px;" value="50" min="1">
+                <label class="text-xs text-gray-300">Прогрессия:</label>
+                <input type="checkbox" id="level-progression" checked>
+                <label class="text-xs text-gray-300">Шаг:</label>
+                <input type="number" id="level-step" class="inline-input" style="width:60px;" value="5" min="1">
             </div>
+            <div class="text-xs text-gray-500 mt-1">Формула: базовое + (уровень × шаг) (если прогрессия включена)</div>
+        </div>
+        <div class="border-t border-white/5 pt-4 flex flex-wrap gap-2">
+            <button class="cyber-btn text-xs" onclick="exportData()">💾 Экспорт</button>
+            <button class="cyber-btn text-xs" onclick="document.getElementById('import-file').click()">📂 Импорт</button>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+            <button class="cyber-btn text-xs" onclick="forceReset()">🔄 Сбросить день</button>
+            <button class="cyber-btn-danger text-xs" onclick="resetSystem()">🗑️ Сброс</button>
         </div>
     </div>
+</div>
     <!-- Вкладка Помощь -->
     <div id="tab-help" class="tab-content hidden">
         <div class="glass-card p-5 fade-in help-text">
@@ -1677,6 +1678,12 @@ function importData(event) {
 function resetSystem() {
     if (confirm('Удалить ВСЕ данные?')) {
         localStorage.removeItem('cyberRPG_v24');
+        location.reload();
+    }
+}
+function forceReset() {
+    if (confirm('Принудительно сбросить сегодняшний день? Все привычки и тренировки обнулятся, HP пересчитается за пропуски.')) {
+        localStorage.setItem('cyberRPG_lastDate', '2026-07-05');
         location.reload();
     }
 }
